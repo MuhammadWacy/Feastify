@@ -4,8 +4,6 @@ const dotenv = require("dotenv");
 
 const connectDB = require("./config/database");
 const authRoutes = require("./routes/authRoutes");
-const serviceRequestRoutes = require("./routes/serviceRequestRoutes");
-const catererRoutes = require("./routes/catererRoutes");
 
 dotenv.config();
 
@@ -22,8 +20,6 @@ const startServer = async () => {
 
         // Routes
         app.use("/api/auth", authRoutes);
-        app.use("/api/requests", serviceRequestRoutes);
-        app.use("/api/caterers", catererRoutes);
 
         // Test Route
         app.get("/", (req, res) => {
