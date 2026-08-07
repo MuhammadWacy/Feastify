@@ -11,14 +11,9 @@ import NotFound from "./pages/NotFound";
 
 import CustomerHome from "./pages/customer/CustomerHome";
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
-import Caterers from "./pages/customer/Caterers";
-import ServiceDetail from "./pages/customer/ServiceDetail";
-import RequestSuccess from "./pages/customer/RequestSuccess";
-import OrderTracking from "./pages/customer/OrderTracking";
 
 import SellerHome from "./pages/seller/SellerHome";
 import SellerDashboard from "./pages/seller/SellerDashboard";
-import OrdersDashboard from "./pages/seller/OrdersDashboard";
 
 function App() {
     return (
@@ -91,61 +86,6 @@ function App() {
                     }
                 />
 
-                <Route
-                    path="/customer/caterers"
-                    element={
-                        <ProtectedRoute allowedRole="customer">
-                            <Layout>
-                                <Caterers />
-                            </Layout>
-                        </ProtectedRoute>
-                    }
-                />
-
-                <Route
-                    path="/customer/caterers/:id"
-                    element={
-                        <ProtectedRoute allowedRole="customer">
-                            <Layout>
-                                <ServiceDetail />
-                            </Layout>
-                        </ProtectedRoute>
-                    }
-                />
-
-                <Route
-                    path="/customer/request-success"
-                    element={
-                        <ProtectedRoute allowedRole="customer">
-                            <Layout>
-                                <RequestSuccess />
-                            </Layout>
-                        </ProtectedRoute>
-                    }
-                />
-
-                <Route
-                    path="/customer/orders"
-                    element={
-                        <ProtectedRoute allowedRole="customer">
-                            <Layout>
-                                <OrderTracking />
-                            </Layout>
-                        </ProtectedRoute>
-                    }
-                />
-
-                <Route
-                    path="/customer/orders/:id"
-                    element={
-                        <ProtectedRoute allowedRole="customer">
-                            <Layout>
-                                <OrderTracking />
-                            </Layout>
-                        </ProtectedRoute>
-                    }
-                />
-
                 {/* Seller */}
 
                 <Route
@@ -165,28 +105,6 @@ function App() {
                         <ProtectedRoute allowedRole="seller">
                             <Layout>
                                 <SellerDashboard />
-                            </Layout>
-                        </ProtectedRoute>
-                    }
-                />
-
-                <Route
-                    path="/seller/orders"
-                    element={
-                        <ProtectedRoute allowedRole="seller">
-                            <Layout>
-                                <OrdersDashboard />
-                            </Layout>
-                        </ProtectedRoute>
-                    }
-                />
-
-                <Route
-                    path="/seller/orders/:id"
-                    element={
-                        <ProtectedRoute allowedRole="seller">
-                            <Layout>
-                                <OrdersDashboard />
                             </Layout>
                         </ProtectedRoute>
                     }
