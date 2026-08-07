@@ -7,6 +7,8 @@ const connectDB = require("./config/database");
 const authRoutes = require("./routes/authRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 
+const catalogRoutes = require("./routes/catalogRoutes");
+
 const serviceRequestRoutes = require("./routes/serviceRequestRoutes");
 const catererRoutes = require("./routes/catererRoutes");
 
@@ -26,6 +28,8 @@ const startServer = async () => {
         // Routes
         app.use("/api/auth", authRoutes);
         app.use("/api/payment", paymentRoutes);
+        
+        app.use("/api/catalog", catalogRoutes);
 
         // Service Request routes
         app.use("/api/requests", serviceRequestRoutes);
