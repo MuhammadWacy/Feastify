@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 
 const connectDB = require("./config/database");
 const authRoutes = require("./routes/authRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ const startServer = async () => {
 
         // Routes
         app.use("/api/auth", authRoutes);
+        app.use("/api/payment", paymentRoutes);
 
         // Test Route
         app.get("/", (req, res) => {

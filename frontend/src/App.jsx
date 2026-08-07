@@ -15,12 +15,18 @@ import CustomerDashboard from "./pages/customer/CustomerDashboard";
 import SellerHome from "./pages/seller/SellerHome";
 import SellerDashboard from "./pages/seller/SellerDashboard";
 
+import Cart from "./pages/checkout/Cart";
+import Checkout from "./pages/checkout/Checkout";
+import PaymentProcessing from "./pages/checkout/PaymentProcessing";
+import Receipt from "./pages/checkout/Receipt";
+
 function App() {
     return (
         <BrowserRouter>
+
             <Routes>
 
-                {/* Public Routes */}
+                {/* ---------------- PUBLIC ---------------- */}
 
                 <Route
                     path="/"
@@ -49,7 +55,7 @@ function App() {
                     }
                 />
 
-                {/* Profile */}
+                {/* ---------------- PROFILE ---------------- */}
 
                 <Route
                     path="/profile"
@@ -62,7 +68,7 @@ function App() {
                     }
                 />
 
-                {/* Customer */}
+                {/* ---------------- CUSTOMER ---------------- */}
 
                 <Route
                     path="/customer/home"
@@ -86,7 +92,53 @@ function App() {
                     }
                 />
 
-                {/* Seller */}
+                <Route
+                    path="/customer/cart"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <Cart />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* ---------------- PAYMENT ---------------- */}
+
+                <Route
+                    path="/checkout/payment"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <Checkout />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/checkout/processing"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <PaymentProcessing />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/checkout/receipt"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <Receipt />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* ---------------- SELLER ---------------- */}
 
                 <Route
                     path="/seller/home"
@@ -110,7 +162,7 @@ function App() {
                     }
                 />
 
-                {/* 404 */}
+                {/* ---------------- 404 ---------------- */}
 
                 <Route
                     path="*"
@@ -122,6 +174,7 @@ function App() {
                 />
 
             </Routes>
+
         </BrowserRouter>
     );
 }

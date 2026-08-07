@@ -59,7 +59,10 @@ function Navbar() {
                     className="collapse navbar-collapse"
                     id="navbarNav"
                 >
+
                     <ul className="navbar-nav me-auto">
+
+                        {/* Home */}
 
                         <li className="nav-item">
                             <Link
@@ -73,6 +76,8 @@ function Navbar() {
                                 Home
                             </Link>
                         </li>
+
+                        {/* Public Navigation */}
 
                         {!token && (
                             <>
@@ -104,13 +109,16 @@ function Navbar() {
                             </>
                         )}
 
+                        {/* Logged-in Navigation */}
+
                         {token && (
                             <>
+                                {/* Dashboard */}
+
                                 <li className="nav-item">
                                     <Link
                                         className={`nav-link text-white ${
-                                            location.pathname ===
-                                            getDashboardRoute()
+                                            location.pathname === getDashboardRoute()
                                                 ? "fw-bold text-decoration-underline"
                                                 : ""
                                         }`}
@@ -119,6 +127,25 @@ function Navbar() {
                                         Dashboard
                                     </Link>
                                 </li>
+
+                                {/* Customer Cart */}
+
+                                {role === "customer" && (
+                                    <li className="nav-item">
+                                        <Link
+                                            className={`nav-link text-white ${
+                                                location.pathname === "/customer/cart"
+                                                    ? "fw-bold text-decoration-underline"
+                                                    : ""
+                                            }`}
+                                            to="/customer/cart"
+                                        >
+                                            Cart
+                                        </Link>
+                                    </li>
+                                )}
+
+                                {/* Profile */}
 
                                 <li className="nav-item">
                                     <Link
