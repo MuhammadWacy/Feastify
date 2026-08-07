@@ -1,8 +1,12 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+
 import CartItem from "./CartItem";
 import OrderSummary from "./OrderSummary";
 
 function SellerCart({ seller }) {
+
+    const navigate = useNavigate();
 
     const subtotal = seller.items.reduce(
         (total, item) =>
@@ -18,20 +22,13 @@ function SellerCart({ seller }) {
 
     const handleRequestService = () => {
 
-        /*
-            This is where your teammate's
-            Booking Request API will be called.
-
-            Example later:
-
-            await API.post("/booking/request", seller);
-        */
-
         console.log("Booking Request:", seller);
 
-        alert(
-            `Booking request sent to ${seller.sellerName}`
-        );
+        navigate("/checkout/payment", {
+            state: {
+                booking: seller,
+            },
+        });
 
     };
 
@@ -46,15 +43,11 @@ function SellerCart({ seller }) {
                 <div>
 
                     <h4 className="mb-1">
-
                         🏢 {seller.sellerName}
-
                     </h4>
 
                     <small className="text-muted">
-
                         {seller.sellerEmail}
-
                     </small>
 
                 </div>
@@ -72,9 +65,7 @@ function SellerCart({ seller }) {
                     <strong>Customer</strong>
 
                     <p className="mb-0">
-
-                        {seller.customerEmail}
-
+                        {seller.customerEmail || "Not available"}
                     </p>
 
                 </div>
@@ -84,9 +75,7 @@ function SellerCart({ seller }) {
                     <strong>Event Date</strong>
 
                     <p className="mb-0">
-
                         {seller.date}
-
                     </p>
 
                 </div>
@@ -97,18 +86,14 @@ function SellerCart({ seller }) {
 
             <div>
 
-                {
+                {seller.items.map((item, index) => (
 
-                    seller.items.map((item, index) => (
+                    <CartItem
+                        key={index}
+                        item={item}
+                    />
 
-                        <CartItem
-                            key={index}
-                            item={item}
-                        />
-
-                    ))
-
-                }
+                ))}
 
             </div>
 
@@ -123,6 +108,7 @@ function SellerCart({ seller }) {
             <div className="d-grid mt-4">
 
                 <button
+                    type="button"
                     className="btn btn-warning"
                     onClick={handleRequestService}
                 >
@@ -134,7 +120,6 @@ function SellerCart({ seller }) {
         </div>
 
     );
-
 }
 
 export default SellerCart;

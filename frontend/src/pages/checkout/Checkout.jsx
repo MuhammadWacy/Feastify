@@ -1,17 +1,67 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import BookingSummary from "../../components/payment/BookingSummary";
 import PaymentMethods from "../../components/payment/PaymentMethods";
 import PaymentButton from "../../components/payment/PaymentButton";
 
-import mockCheckout from "../../data/mockCheckout";
-
 function Checkout() {
 
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const booking = location.state?.booking;
 
     const [selectedMethod, setSelectedMethod] = useState("");
+
+    /*
+     * If someone opens /checkout/payment directly
+     * without coming from the Cart, there is no booking.
+     */
+    if (!booking) {
+
+        return (
+            <div className="container py-5">
+
+                <div className="row justify-content-center">
+
+                    <div className="col-md-7">
+
+                        <div className="card shadow-sm">
+
+                            <div className="card-body text-center p-5">
+
+                                <h2 className="fw-bold mb-3">
+                                    Booking Not Found
+                                </h2>
+
+                                <p className="text-muted mb-4">
+                                    Please select a catering service
+                                    from your cart before proceeding
+                                    to checkout.
+                                </p>
+
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={() =>
+                                        navigate("/customer/cart")
+                                    }
+                                >
+                                    Return to Cart
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        );
+    }
 
     const handlePayment = () => {
 
@@ -21,13 +71,15 @@ function Checkout() {
 
         navigate("/checkout/processing", {
             state: {
-                booking: mockCheckout,
+                booking,
                 paymentMethod: selectedMethod,
             },
         });
+
     };
 
     return (
+
         <div className="container py-5">
 
             {/* Page Header */}
@@ -53,7 +105,7 @@ function Checkout() {
                 <div className="col-lg-7">
 
                     <BookingSummary
-                        booking={mockCheckout}
+                        booking={booking}
                     />
 
                 </div>
