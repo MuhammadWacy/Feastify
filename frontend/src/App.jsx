@@ -11,9 +11,14 @@ import NotFound from "./pages/NotFound";
 
 import CustomerHome from "./pages/customer/CustomerHome";
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
+import Caterers from "./pages/customer/Caterers";
+import ServiceDetail from "./pages/customer/ServiceDetail";
+import RequestSuccess from "./pages/customer/RequestSuccess";
+import OrderTracking from "./pages/customer/OrderTracking";
 
 import SellerHome from "./pages/seller/SellerHome";
 import SellerDashboard from "./pages/seller/SellerDashboard";
+import OrdersDashboard from "./pages/seller/OrdersDashboard";
 
 import Cart from "./pages/checkout/Cart";
 import Checkout from "./pages/checkout/Checkout";
@@ -93,6 +98,7 @@ function App() {
                 />
 
                 <Route
+<<<<<<< HEAD
                     path="/customer/cart"
                     element={
                         <ProtectedRoute allowedRole="customer">
@@ -111,34 +117,83 @@ function App() {
                         <ProtectedRoute allowedRole="customer">
                             <Layout>
                                 <Checkout />
+=======
+                    path="/customer/caterers"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <Caterers />
+>>>>>>> origin/feature/service-requests
                             </Layout>
                         </ProtectedRoute>
                     }
                 />
 
                 <Route
+<<<<<<< HEAD
                     path="/checkout/processing"
                     element={
                         <ProtectedRoute allowedRole="customer">
                             <Layout>
                                 <PaymentProcessing />
+=======
+                    path="/customer/caterers/:id"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <ServiceDetail />
+>>>>>>> origin/feature/service-requests
                             </Layout>
                         </ProtectedRoute>
                     }
                 />
 
                 <Route
+<<<<<<< HEAD
                     path="/checkout/receipt"
                     element={
                         <ProtectedRoute allowedRole="customer">
                             <Layout>
                                 <Receipt />
+=======
+                    path="/customer/request-success"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <RequestSuccess />
+>>>>>>> origin/feature/service-requests
                             </Layout>
                         </ProtectedRoute>
                     }
                 />
 
+<<<<<<< HEAD
                 {/* ---------------- SELLER ---------------- */}
+=======
+                <Route
+                    path="/customer/orders"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <OrderTracking />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/customer/orders/:id"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <OrderTracking />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Seller */}
+>>>>>>> origin/feature/service-requests
 
                 <Route
                     path="/seller/home"
@@ -162,7 +217,33 @@ function App() {
                     }
                 />
 
+<<<<<<< HEAD
                 {/* ---------------- 404 ---------------- */}
+=======
+                <Route
+                    path="/seller/orders"
+                    element={
+                        <ProtectedRoute allowedRole="seller">
+                            <Layout>
+                                <OrdersDashboard />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/seller/orders/:id"
+                    element={
+                        <ProtectedRoute allowedRole="seller">
+                            <Layout>
+                                <OrdersDashboard />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* 404 */}
+>>>>>>> origin/feature/service-requests
 
                 <Route
                     path="*"
