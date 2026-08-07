@@ -3,8 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getMyRequests, getRequestById } from "../../services/requestService";
 
 const STEPS = [
-    { key: "pending", label: "Request Submitted" },
-    { key: "payment_pending", label: "Payment Pending" },
+    { key: "pending", label: "Awaiting Payment" },
     { key: "preparing", label: "Food Preparing" },
     { key: "out_for_delivery", label: "Out for Delivery" },
     { key: "completed", label: "Completed" },
@@ -86,12 +85,12 @@ function OrderTracking() {
                                         {order.caterer?.fullName}
                                     </div>
                                     <div className="small">
-                                        {new Date(order.eventDate).toLocaleDateString()}
+                                        {new Date(order.date).toLocaleDateString()}
                                     </div>
                                     <span
-                                        className={`badge ${order.status === "rejected" ? "bg-danger" : order.status === "completed" ? "bg-success" : "bg-warning text-dark"}`}
+                                        className={`badge ${order.approvalStatus === "rejected" ? "bg-danger" : order.status === "completed" ? "bg-success" : "bg-warning text-dark"}`}
                                     >
-                                        {order.status}
+                                        {order.approvalStatus !== "approved" ? order.approvalStatus : order.status}
                                     </span>
                                 </button>
                             ))}
@@ -121,9 +120,13 @@ function OrderTracking() {
                                     </p>
                                 ))}
 
-                                {selectedOrder.status === "rejected" ? (
+                                {selectedOrder.approvalStatus === "rejected" ? (
                                     <div className="alert alert-danger mt-3">
                                         This request was rejected by the caterer.
+                                    </div>
+                                ) : selectedOrder.approvalStatus === "pending" ? (
+                                    <div className="alert alert-info mt-3">
+                                        Waiting for the caterer to approve this request.
                                     </div>
                                 ) : (
                                     <div className="mt-4">
@@ -146,11 +149,11 @@ function OrderTracking() {
                                     </div>
                                 )}
 
-                                {selectedOrder.status === "payment_pending" && (
+                                {selectedOrder.approvalStatus === "approved" && selectedOrder.status === "pending" && (
                                     <div className="alert alert-warning mt-3">
                                         <h6 className="fw-bold mb-2">Payment Required</h6>
                                         <p className="mb-3">
-                                            Your caterer accepted this request. Complete
+                                            Your caterer approved this request. Complete
                                             payment to move it into preparation.
                                         </p>
                                         <button

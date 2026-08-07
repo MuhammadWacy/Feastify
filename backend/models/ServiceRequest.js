@@ -67,20 +67,20 @@ const serviceRequestSchema = new mongoose.Schema(
             trim: true,
         },
 
-        eventDate: {
+        date: {
             type: Date,
             required: true,
         },
 
         location: {
             type: String,
-            required: true,
+            required: false,
             trim: true,
         },
 
         guests: {
             type: Number,
-            required: true,
+            required: false,
             min: 1,
         },
 
@@ -99,17 +99,16 @@ const serviceRequestSchema = new mongoose.Schema(
             min: 0,
         },
 
+        approvalStatus: {
+            type: String,
+            enum: ["pending", "approved", "rejected"],
+            default: "pending",
+            required: true,
+        },
+
         status: {
             type: String,
-            enum: [
-                "pending",
-                "accepted",
-                "rejected",
-                "payment_pending",
-                "preparing",
-                "out_for_delivery",
-                "completed",
-            ],
+            enum: ["pending", "preparing", "out_for_delivery", "completed"],
             default: "pending",
             required: true,
         },

@@ -121,12 +121,12 @@ function OrdersDashboard() {
                                         {order.customer?.fullName}
                                     </div>
                                     <div className="small">
-                                        {new Date(order.eventDate).toLocaleDateString()}
+                                        {new Date(order.date).toLocaleDateString()}
                                     </div>
                                     <span
-                                        className={`badge ${order.status === "rejected" ? "bg-danger" : order.status === "completed" ? "bg-success" : "bg-warning text-dark"}`}
+                                        className={`badge ${order.approvalStatus === "rejected" ? "bg-danger" : order.status === "completed" ? "bg-success" : "bg-warning text-dark"}`}
                                     >
-                                        {order.status}
+                                        {order.approvalStatus !== "approved" ? order.approvalStatus : order.status}
                                     </span>
                                 </button>
                             ))}
@@ -156,19 +156,19 @@ function OrdersDashboard() {
 
                                 <div className="mb-3">
                                     <span
-                                        className={`badge ${selectedOrder.status === "rejected" ? "bg-danger" : selectedOrder.status === "completed" ? "bg-success" : "bg-warning text-dark"}`}
+                                        className={`badge ${selectedOrder.approvalStatus === "rejected" ? "bg-danger" : selectedOrder.status === "completed" ? "bg-success" : "bg-warning text-dark"}`}
                                     >
-                                        {selectedOrder.status}
+                                        {selectedOrder.approvalStatus !== "approved" ? selectedOrder.approvalStatus : selectedOrder.status}
                                     </span>
                                 </div>
 
-                                {selectedOrder.status === "pending" && (
+                                {selectedOrder.approvalStatus === "pending" && (
                                     <div className="d-flex gap-2 mb-3">
                                         <button
                                             type="button"
                                             className="btn btn-primary"
                                             disabled={busy}
-                                            onClick={() => handleRespond("accepted")}
+                                            onClick={() => handleRespond("approved")}
                                         >
                                             Accept order
                                         </button>

@@ -106,7 +106,9 @@ function ServiceDetail() {
         try {
             const response = await createRequest({
                 catererId: id,
-                eventDate: formData.eventDate,
+                sellerEmail: caterer.email,
+                sellerName: caterer.fullName,
+                date: formData.eventDate,
                 location: formData.location,
                 guests: Number(formData.guests),
                 items: selectedItems.map((item) => ({

@@ -2,7 +2,7 @@ const ServiceRequest = require("../models/ServiceRequest");
 const User = require("../models/User");
 
 const STATUS_FLOW = {
-    payment_pending: "preparing",
+    pending: "preparing",
     preparing: "out_for_delivery",
     out_for_delivery: "completed",
 };
@@ -10,11 +10,13 @@ const STATUS_FLOW = {
 // Create a service request (customer)
 const createRequest = async (req, res) => {
     try {
-        const { catererId, serviceId, eventDate, location, guests, items } = req.body;
+        const { catererId, sellerEmail, serviceId, date, location, guests, items } = req.body;
 
         const [customer, caterer] = await Promise.all([
             User.findById(req.user.id),
-            User.findOne({ _id: catererId, role: "seller" }),
+            catererId
+                ? User.findOne({ _id: catererId, role: "seller" })
+                : User.findOne({ email: sellerEmail, role: "seller" }),
         ]);
 
         if (!caterer) {
@@ -38,12 +40,12 @@ const createRequest = async (req, res) => {
 
         const newRequest = new ServiceRequest({
             customer: req.user.id,
-            caterer: catererId,
+            caterer: caterer._id,
             serviceId,
             customerEmail: customer.email,
             sellerEmail: caterer.email,
             sellerName: caterer.fullName,
-            eventDate,
+            date,
             location,
             guests,
             items,
@@ -147,15 +149,15 @@ const getRequestById = async (req, res) => {
 };
 
 
-// Accept or reject a request (caterer)
+// Approve or reject a request (caterer)
 const respondToRequest = async (req, res) => {
     try {
         const { status } = req.body;
 
-        if (!["accepted", "rejected"].includes(status)) {
+        if (!["approved", "rejected"].includes(status)) {
             return res.status(400).json({
                 success: false,
-                message: "Status must be 'accepted' or 'rejected'",
+                message: "Status must be 'approved' or 'rejected'",
             });
         }
 
@@ -175,16 +177,14 @@ const respondToRequest = async (req, res) => {
             });
         }
 
-        if (request.status !== "pending") {
+        if (request.approvalStatus !== "pending") {
             return res.status(400).json({
                 success: false,
                 message: "This request has already been responded to",
             });
         }
 
-        // Accepting a request moves it straight to payment instead of
-        // sitting on "accepted" — the customer must pay before prep starts.
-        request.status = status === "accepted" ? "payment_pending" : status;
+        request.approvalStatus = status;
         await request.save();
 
         res.status(200).json({
@@ -202,7 +202,7 @@ const respondToRequest = async (req, res) => {
 };
 
 
-// Advance order status (caterer): payment_pending -> preparing -> out_for_delivery -> completed
+// Advance order status: pending -> preparing (payment, customer) -> out_for_delivery -> completed (caterer)
 const updateStatus = async (req, res) => {
     try {
         const request = await ServiceRequest.findById(req.params.id);
@@ -214,7 +214,15 @@ const updateStatus = async (req, res) => {
             });
         }
 
-        if (request.caterer.toString() !== req.user.id) {
+        const isCaterer = request.caterer.toString() === req.user.id;
+        const isCustomer = request.customer.toString() === req.user.id;
+        const isPaymentStep = request.status === "pending";
+
+        const authorized = isPaymentStep
+            ? isCustomer && request.approvalStatus === "approved"
+            : isCaterer;
+
+        if (!authorized) {
             return res.status(403).json({
                 success: false,
                 message: "You are not authorized to update this request",
