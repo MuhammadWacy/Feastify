@@ -8,7 +8,6 @@ import {
 } from "../../services/requestService";
 
 const NEXT_STATUS_LABEL = {
-    accepted: "Mark as Preparing",
     preparing: "Mark as Out for Delivery",
     out_for_delivery: "Mark as Completed",
 };

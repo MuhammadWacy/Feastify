@@ -105,6 +105,7 @@ const serviceRequestSchema = new mongoose.Schema(
                 "pending",
                 "accepted",
                 "rejected",
+                "payment_pending",
                 "preparing",
                 "out_for_delivery",
                 "completed",

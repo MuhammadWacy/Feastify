@@ -2,7 +2,7 @@ const ServiceRequest = require("../models/ServiceRequest");
 const User = require("../models/User");
 
 const STATUS_FLOW = {
-    accepted: "preparing",
+    payment_pending: "preparing",
     preparing: "out_for_delivery",
     out_for_delivery: "completed",
 };
@@ -182,7 +182,9 @@ const respondToRequest = async (req, res) => {
             });
         }
 
-        request.status = status;
+        // Accepting a request moves it straight to payment instead of
+        // sitting on "accepted" — the customer must pay before prep starts.
+        request.status = status === "accepted" ? "payment_pending" : status;
         await request.save();
 
         res.status(200).json({
@@ -200,7 +202,7 @@ const respondToRequest = async (req, res) => {
 };
 
 
-// Advance order status (caterer): accepted -> preparing -> out_for_delivery -> completed
+// Advance order status (caterer): payment_pending -> preparing -> out_for_delivery -> completed
 const updateStatus = async (req, res) => {
     try {
         const request = await ServiceRequest.findById(req.params.id);

@@ -4,7 +4,7 @@ import { getMyRequests, getRequestById } from "../../services/requestService";
 
 const STEPS = [
     { key: "pending", label: "Request Submitted" },
-    { key: "accepted", label: "Accepted by Caterer" },
+    { key: "payment_pending", label: "Payment Pending" },
     { key: "preparing", label: "Food Preparing" },
     { key: "out_for_delivery", label: "Out for Delivery" },
     { key: "completed", label: "Completed" },
@@ -143,6 +143,24 @@ function OrderTracking() {
                                                 </span>
                                             </div>
                                         ))}
+                                    </div>
+                                )}
+
+                                {selectedOrder.status === "payment_pending" && (
+                                    <div className="alert alert-warning mt-3">
+                                        <h6 className="fw-bold mb-2">Payment Required</h6>
+                                        <p className="mb-3">
+                                            Your caterer accepted this request. Complete
+                                            payment to move it into preparation.
+                                        </p>
+                                        <button
+                                            type="button"
+                                            className="btn btn-primary"
+                                            disabled
+                                            title="Payment integration coming soon"
+                                        >
+                                            Pay Now
+                                        </button>
                                     </div>
                                 )}
 
