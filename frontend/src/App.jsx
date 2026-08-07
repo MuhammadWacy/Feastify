@@ -15,13 +15,16 @@ import CustomerDashboard from "./pages/customer/CustomerDashboard";
 import SellerHome from "./pages/seller/SellerHome";
 import SellerDashboard from "./pages/seller/SellerDashboard";
 
+import NegotiationCustomer from './pages/customer/NegotiationCustomer';
+import NegotiationCaterer from './pages/seller/NegotiationCaterer';
+import SellerNegotiationHub from './pages/seller/SellerNegotiationHub';
+
 function App() {
     return (
         <BrowserRouter>
             <Routes>
 
                 {/* Public Routes */}
-
                 <Route
                     path="/"
                     element={
@@ -50,7 +53,6 @@ function App() {
                 />
 
                 {/* Profile */}
-
                 <Route
                     path="/profile"
                     element={
@@ -63,7 +65,6 @@ function App() {
                 />
 
                 {/* Customer */}
-
                 <Route
                     path="/customer/home"
                     element={
@@ -87,7 +88,6 @@ function App() {
                 />
 
                 {/* Seller */}
-
                 <Route
                     path="/seller/home"
                     element={
@@ -110,8 +110,35 @@ function App() {
                     }
                 />
 
-                {/* 404 */}
+                {/* Negotiation Routes */}
+                <Route 
+                   path="/negotiate" 
+                   element={
+                       <Layout>
+                           <NegotiationCustomer />
+                       </Layout>
+                   } 
+                />
 
+                <Route 
+                   path="/seller/negotiate/:id" 
+                   element={
+                       <Layout>
+                           <NegotiationCaterer />
+                       </Layout>
+                   } 
+                />
+
+                <Route 
+                   path="/seller/negotiations" 
+                   element={
+                       <Layout>
+                           <SellerNegotiationHub />
+                       </Layout>
+                   } 
+                />
+
+                {/* 404 Catch-All */}
                 <Route
                     path="*"
                     element={
