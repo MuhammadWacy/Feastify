@@ -3,8 +3,10 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 
 const connectDB = require("./config/database");
+
 const authRoutes = require("./routes/authRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const catalogRoutes = require("./routes/catalogRoutes");
 
 dotenv.config();
 
@@ -22,6 +24,7 @@ const startServer = async () => {
         // Routes
         app.use("/api/auth", authRoutes);
         app.use("/api/payment", paymentRoutes);
+        app.use("/api/catalog", catalogRoutes);
 
         // Test Route
         app.get("/", (req, res) => {
@@ -34,7 +37,9 @@ const startServer = async () => {
         const PORT = process.env.PORT || 5000;
 
         app.listen(PORT, () => {
-            console.log(`🚀 Server is running on http://localhost:${PORT}`);
+            console.log(
+                `🚀 Server is running on http://localhost:${PORT}`
+            );
         });
 
     } catch (error) {
