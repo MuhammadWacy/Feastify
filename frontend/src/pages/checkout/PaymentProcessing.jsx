@@ -16,6 +16,78 @@ const stripePromise = loadStripe(
     import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 );
 
+
+/*
+ * Remove the successfully paid booking from the cart.
+ *
+ * The cart is stored in localStorage as:
+ * feastify-cart
+ *
+ * We match the booking using the seller, customer and date.
+ */
+const removePaidBookingFromCart = (booking) => {
+    try {
+        const storedCart = localStorage.getItem("feastify-cart");
+
+        if (!storedCart) {
+            return;
+        }
+
+        const cart = JSON.parse(storedCart);
+
+        if (!Array.isArray(cart)) {
+            return;
+        }
+
+        const updatedCart = cart.filter((seller) => {
+            const sameSeller =
+                seller.sellerEmail &&
+                booking.sellerEmail &&
+                seller.sellerEmail === booking.sellerEmail;
+
+            const sameCustomer =
+                !booking.customerEmail ||
+                !seller.customerEmail ||
+                seller.customerEmail === booking.customerEmail;
+
+            const sameDate =
+                seller.date &&
+                booking.date &&
+                seller.date === booking.date;
+
+            /*
+             * Remove only the matching paid booking.
+             *
+             * If seller/date information is unavailable, we do NOT
+             * delete anything accidentally.
+             */
+            return !(sameSeller && sameCustomer && sameDate);
+        });
+
+        localStorage.setItem(
+            "feastify-cart",
+            JSON.stringify(updatedCart)
+        );
+
+        /*
+         * Notify other components in the same browser tab.
+         */
+        window.dispatchEvent(new Event("cartUpdated"));
+
+        console.log(
+            "Paid booking removed from cart:",
+            booking
+        );
+
+    } catch (error) {
+        console.error(
+            "Failed to remove paid booking from cart:",
+            error
+        );
+    }
+};
+
+
 function CardPaymentForm({
     booking,
     paymentMethod,
@@ -31,6 +103,7 @@ function CardPaymentForm({
     const [errorMessage, setErrorMessage] = useState("");
 
     const [paymentData, setPaymentData] = useState(null);
+
 
     useEffect(() => {
 
@@ -50,6 +123,7 @@ function CardPaymentForm({
 
                 });
 
+
                 if (!response.success) {
 
                     setErrorMessage(
@@ -59,6 +133,7 @@ function CardPaymentForm({
 
                     return;
                 }
+
 
                 setPaymentData(response);
 
@@ -76,9 +151,11 @@ function CardPaymentForm({
             }
         };
 
+
         createIntent();
 
     }, [booking, paymentMethod, totalAmount]);
+
 
     const handleCardPayment = async (event) => {
 
@@ -88,10 +165,14 @@ function CardPaymentForm({
             return;
         }
 
+
         setProcessing(true);
         setErrorMessage("");
 
-        const cardElement = elements.getElement(CardElement);
+
+        const cardElement =
+            elements.getElement(CardElement);
+
 
         if (!cardElement) {
 
@@ -104,17 +185,20 @@ function CardPaymentForm({
             return;
         }
 
-        const result = await stripe.confirmCardPayment(
-            paymentData.clientSecret,
-            {
-                payment_method: {
-                    card: cardElement,
-                    billing_details: {
-                        email: booking.customerEmail,
+
+        const result =
+            await stripe.confirmCardPayment(
+                paymentData.clientSecret,
+                {
+                    payment_method: {
+                        card: cardElement,
+                        billing_details: {
+                            email: booking.customerEmail,
+                        },
                     },
-                },
-            }
-        );
+                }
+            );
+
 
         if (result.error) {
 
@@ -128,37 +212,48 @@ function CardPaymentForm({
             return;
         }
 
+
         if (
             result.paymentIntent &&
             result.paymentIntent.status === "succeeded"
         ) {
 
-            navigate("/checkout/receipt", {
+            /*
+             * PAYMENT SUCCESSFUL.
+             *
+             * Remove this booking from localStorage BEFORE
+             * sending the customer to the receipt.
+             */
+            removePaidBookingFromCart(booking);
 
-                state: {
 
-                    booking,
+            navigate(
+                "/checkout/receipt",
+                {
+                    state: {
 
-                    paymentMethod,
+                        booking,
 
-                    payment: {
-                        ...paymentData,
+                        paymentMethod,
 
-                        status: result.paymentIntent.status,
+                        payment: {
+                            ...paymentData,
 
-                        paymentIntentId:
-                            result.paymentIntent.id,
+                            status:
+                                result.paymentIntent.status,
 
+                            paymentIntentId:
+                                result.paymentIntent.id,
+                        },
                     },
 
-                },
-
-                replace: true,
-
-            });
+                    replace: true,
+                }
+            );
 
             return;
         }
+
 
         setProcessing(false);
 
@@ -166,6 +261,7 @@ function CardPaymentForm({
             "Payment was not completed."
         );
     };
+
 
     if (errorMessage) {
 
@@ -198,6 +294,7 @@ function CardPaymentForm({
         );
     }
 
+
     if (!paymentData) {
 
         return (
@@ -228,6 +325,7 @@ function CardPaymentForm({
         );
     }
 
+
     return (
         <div className="card shadow-sm border-0">
 
@@ -251,6 +349,7 @@ function CardPaymentForm({
                                     base: {
                                         fontSize: "16px",
                                         color: "#32325d",
+
                                         "::placeholder": {
                                             color: "#a0aec0",
                                         },
@@ -261,11 +360,13 @@ function CardPaymentForm({
 
                     </div>
 
+
                     {errorMessage && (
                         <div className="alert alert-danger">
                             {errorMessage}
                         </div>
                     )}
+
 
                     <button
                         type="submit"
@@ -289,16 +390,19 @@ function CardPaymentForm({
     );
 }
 
+
 function PaymentProcessing() {
 
     const location = useLocation();
 
     const navigate = useNavigate();
 
-    const booking = location.state?.booking;
+    const booking =
+        location.state?.booking;
 
     const paymentMethod =
         location.state?.paymentMethod;
+
 
     if (!booking || !paymentMethod) {
 
@@ -315,31 +419,23 @@ function PaymentProcessing() {
         );
     }
 
+
     /*
      * Calculate the total amount from the booking.
-     *
-     * Each item:
-     *
-     * price per serving × number of servings
-     *
-     * Then all items are added together.
      */
+    const totalAmount =
+        booking.items.reduce(
+            (total, item) =>
+                total +
+                item.pricePerServing *
+                item.servings,
+            0
+        );
 
-    const totalAmount = booking.items.reduce(
-        (total, item) =>
-            total +
-            item.pricePerServing * item.servings,
-        0
-    );
 
     /*
-     * Stripe is the real external payment
-     * integration for Card payments.
-     *
-     * bKash and Nagad remain simulated
-     * methods for this project.
+     * bKash and Nagad are simulated payment methods.
      */
-
     if (paymentMethod !== "card") {
 
         return (
@@ -354,48 +450,77 @@ function PaymentProcessing() {
                             <div className="card-body p-5 text-center">
 
                                 <h2 className="fw-bold mb-3">
+
                                     {paymentMethod === "bkash"
                                         ? "bKash Payment"
                                         : "Nagad Payment"}
+
                                 </h2>
 
+
                                 <p className="text-muted">
+
                                     This payment method is currently
                                     simulated for the Feastify project.
+
                                 </p>
 
+
                                 <h4 className="fw-bold my-4">
+
                                     Amount: ৳
                                     {totalAmount.toLocaleString()}
+
                                 </h4>
+
 
                                 <button
                                     type="button"
                                     className="btn btn-primary w-100"
-                                    onClick={() =>
+                                    onClick={() => {
+
+                                        /*
+                                         * PAYMENT SUCCESSFUL.
+                                         *
+                                         * Remove the paid booking
+                                         * from the cart.
+                                         */
+                                        removePaidBookingFromCart(
+                                            booking
+                                        );
+
+
                                         navigate(
                                             "/checkout/receipt",
                                             {
                                                 state: {
+
                                                     booking,
+
                                                     paymentMethod,
+
                                                     payment: {
                                                         success: true,
+
                                                         status:
                                                             "simulated",
+
                                                         paymentIntentId:
                                                             "SIMULATED-" +
                                                             Date.now(),
+
                                                         amount:
                                                             totalAmount,
+
                                                         currency:
                                                             "bdt",
                                                     },
                                                 },
+
                                                 replace: true,
                                             }
-                                        )
-                                    }
+                                        );
+                                    }}
                                 >
                                     Confirm Simulated Payment
                                 </button>
@@ -411,6 +536,7 @@ function PaymentProcessing() {
             </div>
         );
     }
+
 
     return (
         <div className="container py-5">
@@ -436,5 +562,6 @@ function PaymentProcessing() {
         </div>
     );
 }
+
 
 export default PaymentProcessing;
