@@ -221,6 +221,23 @@ function Navbar() {
                                             </Link>
                                         </li>
                                         <li className="nav-item">
+                                            <Link
+                                                className={`nav-link text-white ${
+                                                    location.pathname.startsWith(
+                                                        "/customer/favorites"
+                                                    ) ||
+                                                    location.pathname.startsWith(
+                                                        "/customer/caterers/"
+                                                    )
+                                                        ? "fw-bold text-decoration-underline"
+                                                        : ""
+                                                }`}
+                                                to="/customer/favorites"
+                                            >
+                                                Favorites
+                                            </Link>
+                                        </li>
+                                        <li className="nav-item">
                                             <button
                                                 type="button"
                                                 className="nav-link text-white border-0 bg-transparent"

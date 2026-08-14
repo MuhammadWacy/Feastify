@@ -1,0 +1,22 @@
+FEASTIFY MODULE 2 - FAVORITES
+
+Customer flow:
+1. Open Customer Home.
+2. Click the heart on any caterer card to add/remove it from Favorites.
+3. Open Favorites from the customer navbar.
+4. Saved caterers appear as cards.
+5. Click View Caterer Profile to open the customer-facing caterer profile.
+6. The profile shows public business information and current available menu listings.
+7. A Customer Reviews section is reserved on the profile for the future review feature.
+
+Persistence:
+- Favorites are saved in MongoDB on the customer User document as references to Catering listings.
+- Unpublished caterers are not returned in the Favorites page.
+
+New backend API routes:
+GET    /api/favorites
+POST   /api/favorites/:cateringId
+DELETE /api/favorites/:cateringId
+GET    /api/catalog/caterings/:id/profile
+
+No new npm packages or environment variables are required.

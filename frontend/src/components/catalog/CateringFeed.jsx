@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CateringCard from "./CateringCard";
 import CateringMenuModal from "./CateringMenuModal";
+import {
+    addFavorite,
+    removeFavorite,
+} from "../../services/favoriteService";
 
 const CATEGORY_ORDER = [
     "Desi",
@@ -17,8 +21,36 @@ const CATEGORY_ORDER = [
     "General",
 ];
 
-function CateringFeed({ caterings }) {
+function CateringFeed({ caterings, initialFavoriteIds = [] }) {
     const [selected, setSelected] = useState(null);
+    const [favoriteIds, setFavoriteIds] = useState(initialFavoriteIds);
+    const [favoriteMessage, setFavoriteMessage] = useState("");
+
+    useEffect(() => {
+        setFavoriteIds(initialFavoriteIds);
+    }, [initialFavoriteIds]);
+
+    const toggleFavorite = async (catering) => {
+        const cateringId = String(catering._id);
+        const currentlyFavorite = favoriteIds.includes(cateringId);
+
+        try {
+            const result = currentlyFavorite
+                ? await removeFavorite(cateringId)
+                : await addFavorite(cateringId);
+
+            setFavoriteIds(result.favoriteIds || []);
+            setFavoriteMessage(result.message || "Favorites updated.");
+
+            window.setTimeout(() => {
+                setFavoriteMessage("");
+            }, 1800);
+        } catch (error) {
+            setFavoriteMessage(
+                error.response?.data?.message || "Could not update favorites."
+            );
+        }
+    };
 
     if (!caterings || caterings.length === 0) {
         return (
@@ -43,7 +75,12 @@ function CateringFeed({ caterings }) {
 
     return (
         <section className="mb-5">
-            <h3 className="fw-bold mb-4">Restaurants & Caterers</h3>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h3 className="fw-bold mb-0">Restaurants & Caterers</h3>
+                {favoriteMessage && (
+                    <span className="small text-muted">{favoriteMessage}</span>
+                )}
+            </div>
 
             {groups.map((group) => (
                 <div className="mb-4" key={group.category}>
@@ -54,6 +91,8 @@ function CateringFeed({ caterings }) {
                             <CateringCard
                                 catering={catering}
                                 onSelect={setSelected}
+                                isFavorite={favoriteIds.includes(String(catering._id))}
+                                onToggleFavorite={toggleFavorite}
                                 key={catering._id}
                             />
                         ))}

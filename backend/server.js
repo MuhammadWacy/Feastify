@@ -13,6 +13,7 @@ const sellerListingRoutes = require("./routes/sellerListingRoutes");
 const serviceRequestRoutes = require("./routes/serviceRequestRoutes");
 const negotiationRoutes = require("./routes/negotiationRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const favoriteRoutes = require("./routes/favoriteRoutes");
 
 const startServer = async () => {
     try {
@@ -30,6 +31,7 @@ const startServer = async () => {
         app.use("/api/service-requests", serviceRequestRoutes);
         app.use("/api/negotiations", negotiationRoutes);
         app.use("/api/chat", chatRoutes);
+        app.use("/api/favorites", favoriteRoutes);
 
         app.get("/", (req, res) => {
             res.json({

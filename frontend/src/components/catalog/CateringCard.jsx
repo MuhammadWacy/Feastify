@@ -1,7 +1,32 @@
-function CateringCard({ catering, onSelect }) {
+function CateringCard({
+    catering,
+    onSelect,
+    isFavorite = false,
+    onToggleFavorite,
+    showProfileButton = false,
+    onViewProfile,
+}) {
     const handleClick = () => {
         if (onSelect) {
             onSelect(catering);
+        }
+    };
+
+    const handleFavorite = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (onToggleFavorite) {
+            onToggleFavorite(catering);
+        }
+    };
+
+    const handleProfile = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (onViewProfile) {
+            onViewProfile(catering);
         }
     };
 
@@ -31,6 +56,28 @@ function CateringCard({ catering, onSelect }) {
                     </div>
                 )}
 
+                {onToggleFavorite && (
+                    <button
+                        type="button"
+                        className={`favorite-heart-button ${
+                            isFavorite ? "is-favorite" : ""
+                        }`}
+                        onClick={handleFavorite}
+                        aria-label={
+                            isFavorite
+                                ? `Remove ${catering.name} from favorites`
+                                : `Add ${catering.name} to favorites`
+                        }
+                        title={
+                            isFavorite
+                                ? "Remove from favorites"
+                                : "Add to favorites"
+                        }
+                    >
+                        {isFavorite ? "♥" : "♡"}
+                    </button>
+                )}
+
                 <div className="catering-banner-overlay">
                     <div>
                         <h5 className="mb-1 text-white">{catering.name}</h5>
@@ -41,7 +88,7 @@ function CateringCard({ catering, onSelect }) {
                 </div>
             </div>
 
-            <div className="card-body">
+            <div className="card-body d-flex flex-column">
                 <p className="card-text text-muted small mb-2">
                     {catering.description}
                 </p>
@@ -53,12 +100,24 @@ function CateringCard({ catering, onSelect }) {
                         : "Not specified"}
                 </div>
 
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-flex justify-content-between align-items-center mt-auto">
                     <span className="badge bg-primary">
                         ⭐ {Number(catering.rating || 0).toFixed(1)}
                     </span>
-                    <small className="text-muted">View menu</small>
+                    <small className="text-muted">
+                        {showProfileButton ? "Saved caterer" : "View menu"}
+                    </small>
                 </div>
+
+                {showProfileButton && onViewProfile && (
+                    <button
+                        type="button"
+                        className="btn btn-outline-primary btn-sm mt-3 w-100"
+                        onClick={handleProfile}
+                    >
+                        View Caterer Profile
+                    </button>
+                )}
             </div>
         </div>
     );

@@ -45,6 +45,13 @@ const userSchema = new mongoose.Schema(
             default: "customer",
             required: true,
         },
+
+        favoriteCaterers: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Catering",
+            },
+        ],
     },
     {
         timestamps: true,

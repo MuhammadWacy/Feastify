@@ -7,6 +7,7 @@ import SpecialOffers from "../../components/catalog/SpecialOffers";
 function CustomerHome() {
     const [caterings, setCaterings] = useState([]);
     const [offers, setOffers] = useState([]);
+    const [favoriteIds, setFavoriteIds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -17,15 +18,17 @@ function CustomerHome() {
 
         const fetchCatalog = async () => {
             try {
-                const [cateringRes, offerRes] = await Promise.all([
+                const [cateringRes, offerRes, favoriteRes] = await Promise.all([
                     API.get("/catalog/caterings"),
                     API.get("/catalog/offers"),
+                    API.get("/favorites"),
                 ]);
 
                 if (cancelled) return;
 
                 setCaterings(cateringRes.data.caterings || []);
                 setOffers(offerRes.data.offers || []);
+                setFavoriteIds(favoriteRes.data.favoriteIds || []);
             } catch (err) {
                 if (cancelled) return;
 
@@ -64,7 +67,10 @@ function CustomerHome() {
             {!loading && !error && (
                 <>
                     <SpecialOffers offers={offers} />
-                    <CateringFeed caterings={caterings} />
+                    <CateringFeed
+                        caterings={caterings}
+                        initialFavoriteIds={favoriteIds}
+                    />
                 </>
             )}
 

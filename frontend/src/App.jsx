@@ -15,6 +15,8 @@ import OrderTracking from "./pages/customer/OrderTracking";
 import NewNegotiation from "./pages/customer/NewNegotiation";
 import CustomerNegotiations from "./pages/customer/CustomerNegotiations";
 import AIAssistant from "./pages/customer/AIAssistant";
+import Favorites from "./pages/customer/Favorites";
+import CatererProfile from "./pages/customer/CatererProfile";
 
 import SellerHome from "./pages/seller/SellerHome";
 import SellerDashboard from "./pages/seller/SellerDashboard";
@@ -138,6 +140,28 @@ function App() {
                         <ProtectedRoute allowedRole="customer">
                             <Layout>
                                 <AIAssistant />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/customer/favorites"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <Favorites />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/customer/caterers/:cateringId"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <CatererProfile />
                             </Layout>
                         </ProtectedRoute>
                     }

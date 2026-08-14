@@ -218,3 +218,114 @@ body {
     background-color: var(--primary-color);
     color: #fff;
 }
+/* Favorites */
+
+.favorite-heart-button {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 4;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255, 255, 255, 0.94);
+    color: #dc3545;
+    font-size: 1.7rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 9px rgba(0, 0, 0, 0.18);
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.favorite-heart-button:hover {
+    transform: scale(1.08);
+    background: #fff;
+}
+
+.favorite-heart-button.is-favorite {
+    color: #dc3545;
+}
+
+.favorites-empty-heart {
+    color: #dc3545;
+    font-size: 4rem;
+    line-height: 1;
+}
+
+.caterer-profile-card {
+    border-radius: 1rem;
+}
+
+.caterer-profile-banner {
+    height: 280px;
+    background: linear-gradient(135deg, #f7f0ea, #fff8f4);
+}
+
+.caterer-profile-banner img,
+.caterer-profile-banner-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.caterer-profile-banner-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: #fff;
+    background: linear-gradient(135deg, #ff9a5f, #ff7034);
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.caterer-profile-details > div {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+.caterer-profile-actions {
+    min-width: 190px;
+}
+
+.profile-menu-item {
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.profile-menu-item .card-img-top,
+.profile-menu-placeholder {
+    height: 190px;
+    width: 100%;
+    object-fit: cover;
+}
+
+.profile-menu-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    color: #fff;
+    background: linear-gradient(135deg, #ff9a5f, #ff7034);
+    font-weight: 700;
+    text-align: center;
+}
+
+.review-placeholder-card {
+    border-radius: 1rem;
+    border: 1px dashed rgba(0, 0, 0, 0.12) !important;
+}
+
+@media (max-width: 767.98px) {
+    .caterer-profile-banner {
+        height: 210px;
+    }
+
+    .caterer-profile-actions {
+        width: 100%;
+    }
+}

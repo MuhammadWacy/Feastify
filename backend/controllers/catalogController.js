@@ -87,8 +87,46 @@ const getCateringMenu = async (req, res) => {
     }
 };
 
+const getCateringProfile = async (req, res) => {
+    try {
+        const catering = await Catering.findOne({
+            _id: req.params.id,
+            isPublished: true,
+            owner: { $ne: null },
+        })
+            .select(
+                "name bannerImage description cuisine category area rating phone email availableDays negotiationEnabled owner createdAt"
+            )
+            .populate("owner", "fullName createdAt");
+
+        if (!catering) {
+            return res.status(404).json({
+                success: false,
+                message: "Caterer profile not found",
+            });
+        }
+
+        const items = await MenuItem.find({
+            catering: catering._id,
+            isAvailable: true,
+        }).sort({ createdAt: 1 });
+
+        res.status(200).json({
+            success: true,
+            catering,
+            items,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
 module.exports = {
     getCaterings,
     getOffers,
     getCateringMenu,
+    getCateringProfile,
 };
