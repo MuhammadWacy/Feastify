@@ -2,12 +2,16 @@ const Catering = require("../models/Catering");
 const Offer = require("../models/Offer");
 const MenuItem = require("../models/MenuItem");
 
-// Get all catering listings for the feed
 const getCaterings = async (req, res) => {
     try {
-        const caterings = await Catering.find()
+        const caterings = await Catering.find({
+            isPublished: true,
+            owner: { $ne: null },
+        })
             .sort({ createdAt: -1 })
-            .select("name bannerImage description cuisine category area rating phone email");
+            .select(
+                "name bannerImage description cuisine category area rating phone email availableDays negotiationEnabled owner"
+            );
 
         res.status(200).json({
             success: true,
@@ -22,21 +26,24 @@ const getCaterings = async (req, res) => {
     }
 };
 
-// Get active special offers with their catering info
 const getOffers = async (req, res) => {
     try {
-        const filter = {
+        const offers = await Offer.find({
             validUntil: { $gte: new Date() },
-        };
-
-        const offers = await Offer.find(filter)
-            .populate("catering", "name bannerImage area cuisine rating")
+        })
+            .populate({
+                path: "catering",
+                match: { isPublished: true, owner: { $ne: null } },
+                select: "name bannerImage area cuisine rating negotiationEnabled",
+            })
             .sort({ createdAt: -1 });
+
+        const publishedOffers = offers.filter((offer) => offer.catering);
 
         res.status(200).json({
             success: true,
-            count: offers.length,
-            offers,
+            count: publishedOffers.length,
+            offers: publishedOffers,
         });
     } catch (error) {
         res.status(500).json({
@@ -46,23 +53,26 @@ const getOffers = async (req, res) => {
     }
 };
 
-// Get the menu and service availability for a single catering
 const getCateringMenu = async (req, res) => {
     try {
-        const catering = await Catering.findById(req.params.id).select(
-            "name bannerImage cuisine category area rating availableDays email"
+        const catering = await Catering.findOne({
+            _id: req.params.id,
+            isPublished: true,
+        }).select(
+            "name bannerImage description cuisine category area rating availableDays email phone negotiationEnabled owner"
         );
 
         if (!catering) {
             return res.status(404).json({
                 success: false,
-                message: "Catering not found",
+                message: "Catering listing not found",
             });
         }
 
-        const items = await MenuItem.find({ catering: catering._id }).sort(
-            { createdAt: 1 }
-        );
+        const items = await MenuItem.find({
+            catering: catering._id,
+            isAvailable: true,
+        }).sort({ createdAt: 1 });
 
         res.status(200).json({
             success: true,

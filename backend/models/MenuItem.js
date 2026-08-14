@@ -14,6 +14,24 @@ const menuItemSchema = new mongoose.Schema(
             trim: true,
         },
 
+        description: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+
+        image: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+
+        imagePublicId: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+
         price: {
             type: Number,
             required: true,
@@ -23,19 +41,24 @@ const menuItemSchema = new mongoose.Schema(
         unit: {
             type: String,
             trim: true,
-            default: "item",
+            default: "serving",
         },
 
         minQty: {
             type: Number,
-            default: 1,
-            min: 0,
+            required: true,
+            min: 1,
         },
 
         maxQty: {
             type: Number,
-            default: 10,
+            required: true,
             min: 1,
+        },
+
+        isAvailable: {
+            type: Boolean,
+            default: true,
         },
     },
     {

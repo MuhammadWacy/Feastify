@@ -14,22 +14,27 @@ const CATEGORY_ORDER = [
     "Healthy & Vegan",
     "Desserts",
     "Continental & Mediterranean",
+    "General",
 ];
 
 function CateringFeed({ caterings }) {
     const [selected, setSelected] = useState(null);
 
     if (!caterings || caterings.length === 0) {
-        return null;
+        return (
+            <div className="alert alert-info">
+                No caterers have published listings yet.
+            </div>
+        );
     }
 
     const groups = CATEGORY_ORDER.map((category) => ({
         category,
-        items: caterings.filter((c) => c.category === category),
+        items: caterings.filter((catering) => catering.category === category),
     })).filter((group) => group.items.length > 0);
 
     const uncategorized = caterings.filter(
-        (c) => !CATEGORY_ORDER.includes(c.category)
+        (catering) => !CATEGORY_ORDER.includes(catering.category)
     );
 
     if (uncategorized.length > 0) {

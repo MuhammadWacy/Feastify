@@ -2,6 +2,12 @@ const mongoose = require("mongoose");
 
 const cateringSchema = new mongoose.Schema(
     {
+        owner: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+        },
+
         name: {
             type: String,
             required: true,
@@ -10,8 +16,14 @@ const cateringSchema = new mongoose.Schema(
 
         bannerImage: {
             type: String,
-            required: true,
             trim: true,
+            default: "",
+        },
+
+        bannerImagePublicId: {
+            type: String,
+            trim: true,
+            default: "",
         },
 
         description: {
@@ -46,9 +58,9 @@ const cateringSchema = new mongoose.Schema(
 
         email: {
             type: String,
+            required: true,
             trim: true,
             lowercase: true,
-            default: "",
         },
 
         rating: {
@@ -58,20 +70,32 @@ const cateringSchema = new mongoose.Schema(
             max: 5,
         },
 
-        owner: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            default: null,
-        },
-
         availableDays: {
             type: [String],
             enum: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-            default: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            default: [],
+        },
+
+        negotiationEnabled: {
+            type: Boolean,
+            default: true,
+        },
+
+        isPublished: {
+            type: Boolean,
+            default: false,
         },
     },
     {
         timestamps: true,
+    }
+);
+
+cateringSchema.index(
+    { owner: 1 },
+    {
+        unique: true,
+        partialFilterExpression: { owner: { $type: "objectId" } },
     }
 );
 
