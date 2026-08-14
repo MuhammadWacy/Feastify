@@ -1,0 +1,23 @@
+FEASTIFY - OPEN-METEO EVENT WEATHER
+==================================
+
+No account, API key, billing account, or payment card is required.
+
+Feature location:
+Customer -> Orders / Live Tracking -> approved order -> Event Weather
+
+How to test:
+1. Start the Feastify backend and frontend normally.
+2. Log in as a customer with an approved service request.
+3. Open Orders / Live Tracking.
+4. Enter a city or area, for example: Dhaka
+5. Click "Check Event Weather".
+
+The feature calls two Open-Meteo endpoints directly from the frontend:
+- Geocoding API: converts the city name into latitude/longitude.
+- Forecast API: returns weather data for those coordinates.
+
+If the order event date is within Open-Meteo's forecast window, Feastify shows the forecast for the event date.
+If it is outside the forecast window, Feastify still demonstrates the live API integration by showing the nearest available forecast preview and a warning.
+
+No new npm package is required.
