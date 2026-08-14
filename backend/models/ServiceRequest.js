@@ -94,6 +94,16 @@ const serviceRequestSchema = new mongoose.Schema(
             trim: true,
             default: "",
         },
+        sourceType: {
+            type: String,
+            enum: ["direct", "negotiation"],
+            default: "direct",
+        },
+        negotiation: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Negotiation",
+            default: null,
+        },
         paymentStatus: {
             type: String,
             enum: ["unpaid", "paid"],

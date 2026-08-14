@@ -12,10 +12,13 @@ import NotFound from "./pages/NotFound";
 import CustomerHome from "./pages/customer/CustomerHome";
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
 import OrderTracking from "./pages/customer/OrderTracking";
+import NewNegotiation from "./pages/customer/NewNegotiation";
+import CustomerNegotiations from "./pages/customer/CustomerNegotiations";
 
 import SellerHome from "./pages/seller/SellerHome";
 import SellerDashboard from "./pages/seller/SellerDashboard";
 import SellerListing from "./pages/seller/SellerListing";
+import SellerNegotiations from "./pages/seller/SellerNegotiations";
 
 import Cart from "./pages/checkout/Cart";
 import Checkout from "./pages/checkout/Checkout";
@@ -106,6 +109,28 @@ function App() {
                 />
 
                 <Route
+                    path="/customer/negotiations/new"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <NewNegotiation />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/customer/negotiations"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <CustomerNegotiations />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
                     path="/customer/cart"
                     element={
                         <ProtectedRoute allowedRole="customer">
@@ -170,6 +195,17 @@ function App() {
                         <ProtectedRoute allowedRole="seller">
                             <Layout>
                                 <SellerDashboard />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/seller/negotiations"
+                    element={
+                        <ProtectedRoute allowedRole="seller">
+                            <Layout>
+                                <SellerNegotiations />
                             </Layout>
                         </ProtectedRoute>
                     }

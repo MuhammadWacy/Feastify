@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../../services/api";
 
 function CateringMenuModal({ catering, onClose, discount = 0 }) {
+    const navigate = useNavigate();
     const [items, setItems] = useState([]);
     const [cateringInfo, setCateringInfo] = useState(catering);
     const [loading, setLoading] = useState(true);
@@ -89,6 +91,7 @@ function CateringMenuModal({ catering, onClose, discount = 0 }) {
                 delete next[item._id];
             } else {
                 next[item._id] = {
+                    menuItemId: item._id,
                     qty: item.minQty,
                     price: item.price,
                     unit: item.unit,
@@ -172,32 +175,26 @@ function CateringMenuModal({ catering, onClose, discount = 0 }) {
 
         if (selectedEntries.length === 0 || !deliveryDayOk) return;
 
-        const negotiations = JSON.parse(
-            localStorage.getItem("feastify-negotiations") || "[]"
-        );
-
-        negotiations.push({
+        const negotiationDraft = {
             cateringId: cateringInfo._id,
             sellerId: cateringInfo.owner || "",
             sellerEmail: cateringInfo.email || "",
-            cateringName: cateringInfo.name,
-            deliveryDate,
-            requestedAt: new Date().toISOString(),
+            sellerName: cateringInfo.name,
+            eventDate: deliveryDate,
             items: selectedEntries.map((entry) => ({
-                name: entry.name,
+                menuItemId: entry.menuItemId,
+                foodName: entry.name,
                 image: entry.image,
-                qty: entry.qty,
+                servings: entry.qty,
                 unit: entry.unit,
-                price: entry.price,
+                listedPrice: effectivePrice(entry.price),
             })),
+        };
+
+        onClose();
+        navigate("/customer/negotiations/new", {
+            state: { negotiationDraft },
         });
-
-        localStorage.setItem(
-            "feastify-negotiations",
-            JSON.stringify(negotiations)
-        );
-
-        setMessage("Negotiation request saved!");
     };
 
     return (
