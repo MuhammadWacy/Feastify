@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getMyServiceRequests } from "../../services/requestService";
+import { getEventWeather } from "../../services/weatherService";
 
 const formatDate = (value) => {
     if (!value) return "";
@@ -14,6 +15,10 @@ function OrderTracking() {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [weatherLoadingId, setWeatherLoadingId] = useState("");
+    const [weatherCities, setWeatherCities] = useState({});
+    const [weatherResults, setWeatherResults] = useState({});
+    const [weatherErrors, setWeatherErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState(
         location.state?.successMessage || ""
     );
@@ -56,6 +61,40 @@ function OrderTracking() {
         navigate("/checkout/payment", {
             state: { booking },
         });
+    };
+
+    const handleCheckWeather = async (request) => {
+        const city = weatherCities[request._id] || "Dhaka";
+
+        try {
+            setWeatherLoadingId(request._id);
+            setWeatherErrors((current) => ({
+                ...current,
+                [request._id]: "",
+            }));
+
+            const result = await getEventWeather({
+                city,
+                eventDate: request.eventDate,
+            });
+
+            setWeatherResults((current) => ({
+                ...current,
+                [request._id]: result,
+            }));
+        } catch (weatherError) {
+            setWeatherResults((current) => ({
+                ...current,
+                [request._id]: null,
+            }));
+            setWeatherErrors((current) => ({
+                ...current,
+                [request._id]:
+                    weatherError.message || "Could not load event weather.",
+            }));
+        } finally {
+            setWeatherLoadingId("");
+        }
     };
 
     const statusBadge = (status) => {
@@ -151,6 +190,117 @@ function OrderTracking() {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {request.approvalStatus === "approved" && (
+                                        <div className="card bg-light border-0 mb-3">
+                                            <div className="card-body">
+                                                <div className="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+                                                    <div>
+                                                        <strong>Event Weather</strong>
+                                                        <div className="small text-muted">
+                                                            Check the forecast for your catering event using Open-Meteo.
+                                                        </div>
+                                                    </div>
+                                                    <span className="badge bg-info text-dark">External API</span>
+                                                </div>
+
+                                                <div className="row g-2 align-items-end">
+                                                    <div className="col-md-8">
+                                                        <label className="form-label small fw-semibold">
+                                                            Event city or area
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            placeholder="e.g. Dhaka"
+                                                            value={weatherCities[request._id] ?? "Dhaka"}
+                                                            onChange={(event) =>
+                                                                setWeatherCities((current) => ({
+                                                                    ...current,
+                                                                    [request._id]: event.target.value,
+                                                                }))
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div className="col-md-4 d-grid">
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-outline-primary"
+                                                            onClick={() => handleCheckWeather(request)}
+                                                            disabled={weatherLoadingId === request._id}
+                                                        >
+                                                            {weatherLoadingId === request._id
+                                                                ? "Checking..."
+                                                                : "Check Event Weather"}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {weatherErrors[request._id] && (
+                                                <div className="alert alert-danger rounded-0 rounded-bottom mb-0">
+                                                    {weatherErrors[request._id]}
+                                                </div>
+                                            )}
+
+                                            {weatherResults[request._id] && (
+                                                <div className="border-top p-3">
+                                                    {!weatherResults[request._id].forecastAvailable && (
+                                                        <div className="alert alert-warning py-2 mb-3">
+                                                            The event date is outside Open-Meteo's 16-day forecast window, so this is the nearest available weather preview for the selected location.
+                                                        </div>
+                                                    )}
+
+                                                    <div className="d-flex flex-wrap justify-content-between gap-3">
+                                                        <div>
+                                                            <div className="fw-bold">
+                                                                {weatherResults[request._id].locationName}
+                                                            </div>
+                                                            <div className="text-muted small">
+                                                                {weatherResults[request._id].forecastAvailable
+                                                                    ? `Forecast for ${formatDate(request.eventDate)}`
+                                                                    : `Preview for ${weatherResults[request._id].forecastDate}`}
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-md-end">
+                                                            <div className="fs-5 fw-bold">
+                                                                {weatherResults[request._id].condition}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="row g-3 mt-1">
+                                                        <div className="col-sm-6 col-lg-3">
+                                                            <div className="small text-muted">High</div>
+                                                            <div className="fw-bold">
+                                                                {weatherResults[request._id].maxTemperature}
+                                                                {weatherResults[request._id].temperatureUnit}
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-sm-6 col-lg-3">
+                                                            <div className="small text-muted">Low</div>
+                                                            <div className="fw-bold">
+                                                                {weatherResults[request._id].minTemperature}
+                                                                {weatherResults[request._id].temperatureUnit}
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-sm-6 col-lg-3">
+                                                            <div className="small text-muted">Rain chance</div>
+                                                            <div className="fw-bold">
+                                                                {weatherResults[request._id].rainChance ?? 0}%
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-sm-6 col-lg-3">
+                                                            <div className="small text-muted">Max wind</div>
+                                                            <div className="fw-bold">
+                                                                {weatherResults[request._id].maxWindSpeed} {weatherResults[request._id].windUnit}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
 
                                     <div className="table-responsive">
                                         <table className="table align-middle">
