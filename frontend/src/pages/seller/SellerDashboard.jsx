@@ -1,19 +1,253 @@
+import { useEffect, useState } from "react";
+import {
+    getIncomingServiceRequests,
+    updateServiceRequestApproval,
+} from "../../services/requestService";
+
+const formatDate = (value) => {
+    if (!value) return "";
+    return new Date(value).toLocaleDateString();
+};
+
 function SellerDashboard() {
+    const [requests, setRequests] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [message, setMessage] = useState("");
+    const [updatingId, setUpdatingId] = useState("");
+
+    const loadRequests = async () => {
+        try {
+            setError("");
+            const response = await getIncomingServiceRequests();
+            setRequests(response.data.requests || []);
+        } catch (requestError) {
+            setError(
+                requestError.response?.data?.message ||
+                    "Could not load incoming service requests."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadRequests();
+    }, []);
+
+    const answerRequest = async (requestId, status) => {
+        setUpdatingId(requestId);
+        setError("");
+        setMessage("");
+
+        try {
+            const response = await updateServiceRequestApproval(
+                requestId,
+                status
+            );
+
+            setRequests((current) =>
+                current.map((request) =>
+                    request._id === requestId
+                        ? response.data.request
+                        : request
+                )
+            );
+
+            setMessage(response.data.message);
+        } catch (requestError) {
+            setError(
+                requestError.response?.data?.message ||
+                    "Could not update the service request."
+            );
+        } finally {
+            setUpdatingId("");
+        }
+    };
+
+    const badgeClass = (status) => {
+        if (status === "approved") return "bg-success";
+        if (status === "rejected") return "bg-danger";
+        return "bg-warning text-dark";
+    };
 
     return (
+        <div className="container py-5">
+            <div className="mb-4">
+                <h2 className="fw-bold mb-1">Seller Dashboard</h2>
+                <p className="text-muted mb-0">
+                    Review service requests sent by customers.
+                </p>
+            </div>
 
-        <div className="container mt-5">
+            {message && <div className="alert alert-success">{message}</div>}
+            {error && <div className="alert alert-danger">{error}</div>}
 
-            <h2>Seller Dashboard</h2>
+            {loading ? (
+                <div className="text-center py-5">
+                    <div className="spinner-border" role="status" />
+                </div>
+            ) : requests.length === 0 ? (
+                <div className="card shadow-sm">
+                    <div className="card-body text-center py-5">
+                        <h4>No incoming requests</h4>
+                        <p className="text-muted mb-0">
+                            Customer service requests will appear here.
+                        </p>
+                    </div>
+                </div>
+            ) : (
+                <div className="d-grid gap-4">
+                    {requests.map((request) => (
+                        <div className="card shadow-sm border-0" key={request._id}>
+                            <div className="card-body p-4">
+                                <div className="d-flex flex-wrap justify-content-between gap-3 mb-4">
+                                    <div>
+                                        <h4 className="fw-bold mb-1">
+                                            {request.customerName}
+                                        </h4>
+                                        <div className="text-muted">
+                                            {request.customerEmail}
+                                        </div>
+                                    </div>
 
-            <p>
-                Welcome! You are logged in as a seller.
-            </p>
+                                    <div className="text-end">
+                                        <span
+                                            className={`badge ${badgeClass(
+                                                request.approvalStatus
+                                            )} fs-6 text-capitalize`}
+                                        >
+                                            {request.approvalStatus}
+                                        </span>
+                                        <div className="small text-muted mt-2">
+                                            Sent {formatDate(request.createdAt)}
+                                        </div>
+                                    </div>
+                                </div>
 
+                                <div className="row g-3 mb-4">
+                                    <div className="col-md-4">
+                                        <strong>Catering Listing</strong>
+                                        <div>{request.sellerName}</div>
+                                    </div>
+                                    <div className="col-md-4">
+                                        <strong>Event Date</strong>
+                                        <div>{formatDate(request.eventDate)}</div>
+                                    </div>
+                                    <div className="col-md-4">
+                                        <strong>Payable Amount</strong>
+                                        <div className="fw-bold text-primary">
+                                            ৳{Number(
+                                                request.payableAmount || 0
+                                            ).toLocaleString()}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="table-responsive">
+                                    <table className="table align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>Dish</th>
+                                                <th>Price / Serving</th>
+                                                <th>Servings</th>
+                                                <th>Subtotal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {request.items.map((item, index) => (
+                                                <tr key={`${request._id}-${index}`}>
+                                                    <td>
+                                                        <div className="d-flex align-items-center gap-2">
+                                                            {item.image && (
+                                                                <img
+                                                                    src={item.image}
+                                                                    alt={item.foodName}
+                                                                    style={{
+                                                                        width: "55px",
+                                                                        height: "55px",
+                                                                        objectFit: "cover",
+                                                                        borderRadius: "8px",
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            <span className="fw-semibold">
+                                                                {item.foodName}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        ৳{Number(
+                                                            item.pricePerServing
+                                                        ).toLocaleString()}
+                                                    </td>
+                                                    <td>{item.servings}</td>
+                                                    <td>
+                                                        ৳{(
+                                                            item.pricePerServing *
+                                                            item.servings
+                                                        ).toLocaleString()}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {request.approvalStatus === "pending" ? (
+                                    <div className="d-flex gap-2 justify-content-end mt-3">
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-danger"
+                                            disabled={updatingId === request._id}
+                                            onClick={() =>
+                                                answerRequest(
+                                                    request._id,
+                                                    "rejected"
+                                                )
+                                            }
+                                        >
+                                            {updatingId === request._id
+                                                ? "Updating..."
+                                                : "Reject Request"}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="btn btn-success"
+                                            disabled={updatingId === request._id}
+                                            onClick={() =>
+                                                answerRequest(
+                                                    request._id,
+                                                    "approved"
+                                                )
+                                            }
+                                        >
+                                            {updatingId === request._id
+                                                ? "Updating..."
+                                                : "Approve Request"}
+                                        </button>
+                                    </div>
+                                ) : request.approvalStatus === "rejected" ? (
+                                    <div className="alert alert-danger mb-0 mt-3">
+                                        This request has been rejected.
+                                    </div>
+                                ) : request.paymentStatus === "paid" ? (
+                                    <div className="alert alert-primary mb-0 mt-3">
+                                        This request has been approved and paid.
+                                    </div>
+                                ) : (
+                                    <div className="alert alert-success mb-0 mt-3">
+                                        This request has been approved and is waiting for customer payment.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
-
     );
-
 }
 
 export default SellerDashboard;

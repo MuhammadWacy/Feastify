@@ -10,6 +10,7 @@ const authRoutes = require("./routes/authRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const catalogRoutes = require("./routes/catalogRoutes");
 const sellerListingRoutes = require("./routes/sellerListingRoutes");
+const serviceRequestRoutes = require("./routes/serviceRequestRoutes");
 
 const startServer = async () => {
     try {
@@ -24,6 +25,7 @@ const startServer = async () => {
         app.use("/api/payment", paymentRoutes);
         app.use("/api/catalog", catalogRoutes);
         app.use("/api/seller/listing", sellerListingRoutes);
+        app.use("/api/service-requests", serviceRequestRoutes);
 
         app.get("/", (req, res) => {
             res.json({

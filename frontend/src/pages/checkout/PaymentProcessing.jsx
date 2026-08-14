@@ -11,6 +11,7 @@ import {
 import { loadStripe } from "@stripe/stripe-js";
 
 import createPayment from "../../services/paymentApi";
+import { markServiceRequestPaid } from "../../services/requestService";
 
 const stripePromise = loadStripe(
     import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -226,6 +227,26 @@ function CardPaymentForm({
              */
             removePaidBookingFromCart(booking);
 
+            if (booking.serviceRequestId) {
+                try {
+                    await markServiceRequestPaid(
+                        booking.serviceRequestId,
+                        paymentMethod,
+                        result.paymentIntent.id
+                    );
+                } catch (syncError) {
+                    console.error(
+                        "Payment succeeded but order status could not be updated:",
+                        syncError
+                    );
+
+                    setProcessing(false);
+                    setErrorMessage(
+                        "Payment succeeded, but Feastify could not update the order status. Please try refreshing the order page."
+                    );
+                    return;
+                }
+            }
 
             navigate(
                 "/checkout/receipt",
@@ -477,18 +498,28 @@ function PaymentProcessing() {
                                 <button
                                     type="button"
                                     className="btn btn-primary w-100"
-                                    onClick={() => {
+                                    onClick={async () => {
 
-                                        /*
-                                         * PAYMENT SUCCESSFUL.
-                                         *
-                                         * Remove the paid booking
-                                         * from the cart.
-                                         */
-                                        removePaidBookingFromCart(
-                                            booking
-                                        );
+                                        removePaidBookingFromCart(booking);
 
+                                        const simulatedPaymentId =
+                                            "SIMULATED-" + Date.now();
+
+                                        if (booking.serviceRequestId) {
+                                            try {
+                                                await markServiceRequestPaid(
+                                                    booking.serviceRequestId,
+                                                    paymentMethod,
+                                                    simulatedPaymentId
+                                                );
+                                            } catch (syncError) {
+                                                console.error(
+                                                    "Payment succeeded but order status could not be updated:",
+                                                    syncError
+                                                );
+                                                return;
+                                            }
+                                        }
 
                                         navigate(
                                             "/checkout/receipt",
@@ -506,8 +537,7 @@ function PaymentProcessing() {
                                                             "simulated",
 
                                                         paymentIntentId:
-                                                            "SIMULATED-" +
-                                                            Date.now(),
+                                                            simulatedPaymentId,
 
                                                         amount:
                                                             totalAmount,

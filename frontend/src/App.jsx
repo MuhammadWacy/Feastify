@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 
 import CustomerHome from "./pages/customer/CustomerHome";
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
+import OrderTracking from "./pages/customer/OrderTracking";
 
 import SellerHome from "./pages/seller/SellerHome";
 import SellerDashboard from "./pages/seller/SellerDashboard";
@@ -88,6 +89,17 @@ function App() {
                         <ProtectedRoute allowedRole="customer">
                             <Layout>
                                 <CustomerDashboard />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/customer/orders"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <OrderTracking />
                             </Layout>
                         </ProtectedRoute>
                     }

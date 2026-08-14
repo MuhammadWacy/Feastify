@@ -128,6 +128,21 @@ function Navbar() {
                                     </Link>
                                 </li>
 
+                                {role === "customer" && (
+                                    <li className="nav-item">
+                                        <Link
+                                            className={`nav-link text-white ${
+                                                location.pathname === "/customer/orders"
+                                                    ? "fw-bold text-decoration-underline"
+                                                    : ""
+                                            }`}
+                                            to="/customer/orders"
+                                        >
+                                            Orders
+                                        </Link>
+                                    </li>
+                                )}
+
                                 {/* Customer Cart */}
 
                                 {role === "customer" && (
