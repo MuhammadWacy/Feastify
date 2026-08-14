@@ -14,6 +14,7 @@ import CustomerDashboard from "./pages/customer/CustomerDashboard";
 import OrderTracking from "./pages/customer/OrderTracking";
 import NewNegotiation from "./pages/customer/NewNegotiation";
 import CustomerNegotiations from "./pages/customer/CustomerNegotiations";
+import AIAssistant from "./pages/customer/AIAssistant";
 
 import SellerHome from "./pages/seller/SellerHome";
 import SellerDashboard from "./pages/seller/SellerDashboard";
@@ -125,6 +126,17 @@ function App() {
                         <ProtectedRoute allowedRole="customer">
                             <Layout>
                                 <CustomerNegotiations />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/customer/assistant"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <AIAssistant />
                             </Layout>
                         </ProtectedRoute>
                     }

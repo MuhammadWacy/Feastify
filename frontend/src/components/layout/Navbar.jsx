@@ -134,6 +134,16 @@ function Navbar() {
                                         <li className="nav-item">
                                             <Link
                                                 className={`nav-link text-white ${activeClass(
+                                                    "/customer/assistant"
+                                                )}`}
+                                                to="/customer/assistant"
+                                            >
+                                                AI Assistant
+                                            </Link>
+                                        </li>
+                                        <li className="nav-item">
+                                            <Link
+                                                className={`nav-link text-white ${activeClass(
                                                     "/customer/cart"
                                                 )}`}
                                                 to="/customer/cart"
