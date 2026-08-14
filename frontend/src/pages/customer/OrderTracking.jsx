@@ -233,14 +233,49 @@ function OrderTracking() {
                                         )}
 
                                     {request.approvalStatus === "approved" &&
-                                        request.paymentStatus === "paid" && (
+                                        request.paymentStatus === "paid" &&
+                                        request.deliveryStatus !== "delivered" && (
                                             <div className="alert alert-primary mb-0">
                                                 <strong>Payment completed.</strong>
                                                 <div className="small">
-                                                    This order has already been paid successfully.
+                                                    The caterer will update this order after delivery or handover.
                                                 </div>
                                             </div>
                                         )}
+
+                                    {request.deliveryStatus === "delivered" && (
+                                        <div className="alert alert-success mb-0">
+                                            <div className="d-flex flex-wrap justify-content-between gap-3 align-items-center">
+                                                <div>
+                                                    <strong>Order delivered.</strong>
+                                                    <div className="small">
+                                                        Delivery completed {request.deliveredAt
+                                                            ? new Date(request.deliveredAt).toLocaleString()
+                                                            : ""}.
+                                                    </div>
+                                                </div>
+
+                                                {request.deliveryProofImage && (
+                                                    <a
+                                                        href={request.deliveryProofImage}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                    >
+                                                        <img
+                                                            src={request.deliveryProofImage}
+                                                            alt="Delivery proof"
+                                                            className="rounded"
+                                                            style={{
+                                                                width: "110px",
+                                                                height: "80px",
+                                                                objectFit: "cover",
+                                                            }}
+                                                        />
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

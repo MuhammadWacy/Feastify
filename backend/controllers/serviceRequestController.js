@@ -1,6 +1,26 @@
 const ServiceRequest = require("../models/ServiceRequest");
 const User = require("../models/User");
 const Catering = require("../models/Catering");
+const cloudinary = require("../config/cloudinary");
+const { sendDeliveryNotification } = require("../services/oneSignalService");
+
+
+const uploadBuffer = (buffer, folder) => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            {
+                folder,
+                resource_type: "image",
+            },
+            (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+            }
+        );
+
+        stream.end(buffer);
+    });
+};
 
 const parseEventDate = (value) => {
     if (!value) return null;
@@ -268,10 +288,112 @@ const markRequestPaid = async (req, res) => {
     }
 };
 
+
+const markRequestDelivered = async (req, res) => {
+    try {
+        const seller = await User.findById(req.user.id);
+
+        if (!seller || seller.role !== "seller") {
+            return res.status(403).json({
+                success: false,
+                message: "Only sellers can complete an order delivery.",
+            });
+        }
+
+        const request = await ServiceRequest.findOne({
+            _id: req.params.id,
+            seller: req.user.id,
+        });
+
+        if (!request) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found.",
+            });
+        }
+
+        if (request.approvalStatus !== "approved") {
+            return res.status(400).json({
+                success: false,
+                message: "Only approved orders can be marked as delivered.",
+            });
+        }
+
+        if (request.paymentStatus !== "paid") {
+            return res.status(400).json({
+                success: false,
+                message: "The customer must complete payment before delivery can be verified.",
+            });
+        }
+
+        if (request.deliveryStatus === "delivered") {
+            return res.status(400).json({
+                success: false,
+                message: "This order has already been marked as delivered.",
+            });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "Upload a delivery location photo as proof of work.",
+            });
+        }
+
+        const uploadResult = await uploadBuffer(
+            req.file.buffer,
+            "feastify/delivery-proofs"
+        );
+
+        request.deliveryStatus = "delivered";
+        request.deliveryProofImage = uploadResult.secure_url;
+        request.deliveryProofPublicId = uploadResult.public_id;
+        request.deliveredAt = new Date();
+
+        await request.save();
+
+        let notification = { sent: false };
+
+        try {
+            notification = await sendDeliveryNotification({
+                customerId: request.customer,
+                sellerName: request.sellerName,
+                orderId: request._id,
+            });
+
+            request.deliveryNotificationSent = Boolean(notification.sent);
+            request.deliveryNotificationId = notification.notificationId || "";
+            request.deliveryNotificationError = notification.sent
+                ? ""
+                : notification.message || "No active push subscription was found.";
+        } catch (notificationError) {
+            request.deliveryNotificationSent = false;
+            request.deliveryNotificationError = notificationError.message;
+        }
+
+        await request.save();
+
+        res.status(200).json({
+            success: true,
+            message: request.deliveryNotificationSent
+                ? "Order marked as delivered and customer notification sent."
+                : "Order marked as delivered. Push notification could not be confirmed.",
+            request,
+            notificationSent: request.deliveryNotificationSent,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
 module.exports = {
     createRequest,
     getMyRequests,
     getIncomingRequests,
     updateApprovalStatus,
     markRequestPaid,
+    markRequestDelivered,
 };

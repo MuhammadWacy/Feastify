@@ -33,3 +33,14 @@ export const markServiceRequestPaid = (
         paymentMethod,
         paymentReference,
     });
+
+export const markServiceRequestDelivered = (requestId, proofImage) => {
+    const formData = new FormData();
+    formData.append("proofImage", proofImage);
+
+    return API.patch(`/service-requests/${requestId}/delivery`, formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+};

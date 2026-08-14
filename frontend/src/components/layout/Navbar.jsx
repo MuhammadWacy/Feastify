@@ -1,4 +1,10 @@
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+    identifyOneSignalUser,
+    requestNotificationPermission,
+    logoutOneSignalUser,
+} from "../../services/oneSignalService";
 
 function Navbar() {
     const navigate = useNavigate();
@@ -6,12 +12,85 @@ function Navbar() {
 
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
+    const userId = localStorage.getItem("userId");
+    const [notificationMessage, setNotificationMessage] = useState("");
+    const [notificationsEnabled, setNotificationsEnabled] = useState(
+        typeof Notification !== "undefined" && Notification.permission === "granted"
+    );
 
-    const logout = () => {
+    useEffect(() => {
+        if (
+            token &&
+            role === "customer" &&
+            userId &&
+            typeof Notification !== "undefined" &&
+            Notification.permission === "granted"
+        ) {
+            identifyOneSignalUser(userId)
+                .then((result) => {
+                    if (result?.linked) {
+                        setNotificationsEnabled(true);
+                    }
+                })
+                .catch((error) => {
+                    console.error("OneSignal user restore failed:", error);
+                });
+        }
+    }, [token, role, userId]);
+
+    const logout = async () => {
+        if (role === "customer") {
+            await logoutOneSignalUser();
+        }
         localStorage.removeItem("token");
         localStorage.removeItem("role");
         localStorage.removeItem("email");
+        localStorage.removeItem("name");
+        localStorage.removeItem("userId");
         navigate("/login");
+    };
+
+    const enableNotifications = async () => {
+        setNotificationMessage("");
+
+        try {
+            if (!userId) {
+                setNotificationMessage(
+                    "Please log out and log in again first."
+                );
+                return;
+            }
+
+            const result =
+                await requestNotificationPermission(userId);
+
+            if (!result.supported) {
+                setNotificationMessage(
+                    result.message ||
+                        "Push notifications are not supported in this browser."
+                );
+                return;
+            }
+
+            if (result.permission && result.linked) {
+                setNotificationsEnabled(true);
+                setNotificationMessage(
+                    "Delivery notifications enabled."
+                );
+                return;
+            }
+
+            setNotificationsEnabled(false);
+            setNotificationMessage(
+                result.message ||
+                    "Notification setup could not be completed."
+            );
+        } catch (error) {
+            setNotificationsEnabled(false);
+            setNotificationMessage(
+                error.message || "Could not enable notifications."
+            );
+        }
     };
 
     const getHomeRoute = () => {
@@ -142,6 +221,18 @@ function Navbar() {
                                             </Link>
                                         </li>
                                         <li className="nav-item">
+                                            <button
+                                                type="button"
+                                                className="nav-link text-white border-0 bg-transparent"
+                                                onClick={enableNotifications}
+                                                title={notificationMessage || "Enable browser push notifications"}
+                                            >
+                                                {notificationsEnabled
+                                                    ? "Notifications Enabled"
+                                                    : "Enable Notifications"}
+                                            </button>
+                                        </li>
+                                        <li className="nav-item">
                                             <Link
                                                 className={`nav-link text-white ${activeClass(
                                                     "/customer/cart"
@@ -164,6 +255,16 @@ function Navbar() {
                                                 to="/seller/negotiations"
                                             >
                                                 Negotiations
+                                            </Link>
+                                        </li>
+                                        <li className="nav-item">
+                                            <Link
+                                                className={`nav-link text-white ${activeClass(
+                                                    "/seller/deliveries"
+                                                )}`}
+                                                to="/seller/deliveries"
+                                            >
+                                                Delivery Verification
                                             </Link>
                                         </li>
                                         <li className="nav-item">

@@ -124,6 +124,40 @@ const serviceRequestSchema = new mongoose.Schema(
             type: Date,
             default: null,
         },
+        deliveryStatus: {
+            type: String,
+            enum: ["not_delivered", "delivered"],
+            default: "not_delivered",
+            index: true,
+        },
+        deliveryProofImage: {
+            type: String,
+            default: "",
+            trim: true,
+        },
+        deliveryProofPublicId: {
+            type: String,
+            default: "",
+            trim: true,
+        },
+        deliveredAt: {
+            type: Date,
+            default: null,
+        },
+        deliveryNotificationSent: {
+            type: Boolean,
+            default: false,
+        },
+        deliveryNotificationId: {
+            type: String,
+            default: "",
+            trim: true,
+        },
+        deliveryNotificationError: {
+            type: String,
+            default: "",
+            trim: true,
+        },
     },
     {
         timestamps: true,
