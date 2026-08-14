@@ -1,32 +1,23 @@
-const express = require('express');
+const express = require("express");
+const protect = require("../middleware/authMiddleware");
+const {
+    createNegotiation,
+    getMyNegotiations,
+    getIncomingNegotiations,
+    updateNegotiationOffer,
+    confirmSellerCounter,
+    finalizeNegotiation,
+    rejectNegotiation,
+} = require("../controllers/negotiationController");
+
 const router = express.Router();
 
-// ==========================================
-// IMPORTS: Existing and New Controller Functions
-// ==========================================
-const { 
-  createNegotiation, 
-  getNegotiationById, 
-  updateNegotiation,
-  getCatererNegotiationsHub,       // NEW ADDITION
-  toggleNegotiations,              // NEW ADDITION
-  declineAllNegotiations           // NEW ADDITION
-} = require('../controllers/negotiationController');
-
-// Route to create a new negotiation offer
-router.post('/', createNegotiation);
-
-// ==========================================
-// NEW ADDITION: Caterer Negotiations Hub Routes
-// ==========================================
-router.get('/hub/:catererId', getCatererNegotiationsHub);
-router.put('/hub/:catererId/toggle', toggleNegotiations);
-router.put('/hub/:catererId/decline-all', declineAllNegotiations);
-
-// Route to get a single negotiation by ID
-router.get('/:id', getNegotiationById);
-
-// Route to update negotiation (caterer counter-offer / status updates)
-router.put('/:id', updateNegotiation);
+router.post("/", protect, createNegotiation);
+router.get("/my", protect, getMyNegotiations);
+router.get("/incoming", protect, getIncomingNegotiations);
+router.patch("/:id/offer", protect, updateNegotiationOffer);
+router.patch("/:id/confirm", protect, confirmSellerCounter);
+router.patch("/:id/finalize", protect, finalizeNegotiation);
+router.patch("/:id/reject", protect, rejectNegotiation);
 
 module.exports = router;

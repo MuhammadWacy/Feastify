@@ -2,32 +2,39 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 
-const connectDB = require("./config/database");
-const authRoutes = require("./routes/authRoutes");
-const negotiationRoutes = require("./routes/negotiationRoutes");
-
 dotenv.config();
+
+const connectDB = require("./config/database");
+
+const authRoutes = require("./routes/authRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
+const catalogRoutes = require("./routes/catalogRoutes");
+const sellerListingRoutes = require("./routes/sellerListingRoutes");
+const serviceRequestRoutes = require("./routes/serviceRequestRoutes");
+const negotiationRoutes = require("./routes/negotiationRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 
 const startServer = async () => {
     try {
-        // Connect to MongoDB first
         await connectDB();
 
         const app = express();
 
-        // Middleware
         app.use(cors());
         app.use(express.json());
 
-        // Routes
         app.use("/api/auth", authRoutes);
+        app.use("/api/payment", paymentRoutes);
+        app.use("/api/catalog", catalogRoutes);
+        app.use("/api/seller/listing", sellerListingRoutes);
+        app.use("/api/service-requests", serviceRequestRoutes);
         app.use("/api/negotiations", negotiationRoutes);
+        app.use("/api/chat", chatRoutes);
 
-        // Test Route
         app.get("/", (req, res) => {
             res.json({
                 success: true,
-                message: "Welcome to Feastify Backend!"
+                message: "Welcome to Feastify Backend!",
             });
         });
 
@@ -36,7 +43,6 @@ const startServer = async () => {
         app.listen(PORT, () => {
             console.log(`🚀 Server is running on http://localhost:${PORT}`);
         });
-
     } catch (error) {
         console.error("Server failed to start:", error);
     }
