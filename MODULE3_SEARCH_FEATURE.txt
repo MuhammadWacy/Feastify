@@ -1,0 +1,29 @@
+MODULE 3 - MEMBER 1 - FEATURE 1
+SEARCH + FILTER CUSTOMER FEED
+
+Customer Home now includes a search bar that searches live MongoDB-backed
+caterer listings and dishes.
+
+Supported search/filter options:
+- Keyword: caterer name, description, cuisine, category, area, dish name/description
+- Price per serving/plate: 0 to 10,000 BDT
+- Serving capability: minimum cannot be less than 10
+- Area: dropdown built only from currently published caterer areas
+- Category: dropdown built from published caterer categories
+- Negotiation availability: optional convenience filter
+
+Backend endpoints:
+GET /api/catalog/search-options
+GET /api/catalog/search
+
+Important files:
+backend/controllers/catalogController.js
+backend/routes/catalogRoutes.js
+frontend/src/services/catalogSearchService.js
+frontend/src/components/catalog/CatalogSearchPanel.jsx
+frontend/src/pages/customer/CustomerHome.jsx
+frontend/src/components/catalog/CateringFeed.jsx
+frontend/src/components/catalog/CateringCard.jsx
+frontend/src/index.css
+
+No new npm package or .env value is required.

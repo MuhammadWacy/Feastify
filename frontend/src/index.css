@@ -329,3 +329,69 @@ body {
         width: 100%;
     }
 }
+
+/* Module 3 - Caterer and dish search */
+.catalog-search-shell {
+    position: relative;
+    z-index: 10;
+}
+
+.catalog-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+}
+
+.catalog-search-icon {
+    padding-left: 0.6rem;
+    font-size: 1.5rem;
+    color: #6c757d;
+}
+
+.catalog-search-input {
+    border: 0;
+    box-shadow: none !important;
+}
+
+.catalog-search-input:focus {
+    border: 0;
+}
+
+.catalog-filter-panel {
+    margin-top: 0.7rem;
+    padding: 1.25rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 1rem;
+    background: #fffaf7;
+}
+
+.search-match-box {
+    padding: 0.55rem 0.65rem;
+    border-radius: 0.65rem;
+    background: #fff5ef;
+    border: 1px solid rgba(255, 112, 52, 0.2);
+}
+
+@media (max-width: 767px) {
+    .catalog-search-bar {
+        flex-wrap: wrap;
+    }
+
+    .catalog-search-icon {
+        display: none;
+    }
+
+    .catalog-search-input {
+        flex: 1 1 100%;
+    }
+
+    .catalog-filter-toggle,
+    .catalog-search-button {
+        flex: 1 1 calc(50% - 0.5rem);
+    }
+}

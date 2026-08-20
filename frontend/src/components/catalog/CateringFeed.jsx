@@ -21,7 +21,11 @@ const CATEGORY_ORDER = [
     "General",
 ];
 
-function CateringFeed({ caterings, initialFavoriteIds = [] }) {
+function CateringFeed({
+    caterings,
+    initialFavoriteIds = [],
+    emptyMessage = "No caterers have published listings yet.",
+}) {
     const [selected, setSelected] = useState(null);
     const [favoriteIds, setFavoriteIds] = useState(initialFavoriteIds);
     const [favoriteMessage, setFavoriteMessage] = useState("");
@@ -55,7 +59,7 @@ function CateringFeed({ caterings, initialFavoriteIds = [] }) {
     if (!caterings || caterings.length === 0) {
         return (
             <div className="alert alert-info">
-                No caterers have published listings yet.
+                {emptyMessage}
             </div>
         );
     }

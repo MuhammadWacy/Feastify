@@ -100,6 +100,17 @@ function CateringCard({
                         : "Not specified"}
                 </div>
 
+                {catering.searchMatches?.length > 0 && (
+                    <div className="search-match-box mb-2">
+                        <div className="small fw-semibold mb-1">Matched dishes</div>
+                        {catering.searchMatches.slice(0, 2).map((item) => (
+                            <div className="small" key={item._id}>
+                                {item.name} · ৳{item.price}/{item.unit || "serving"} · {item.minQty}-{item.maxQty} servings
+                            </div>
+                        ))}
+                    </div>
+                )}
+
                 <div className="d-flex justify-content-between align-items-center mt-auto">
                     <span className="badge bg-primary">
                         ⭐ {Number(catering.rating || 0).toFixed(1)}

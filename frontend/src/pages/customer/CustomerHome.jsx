@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react";
 import API from "../../services/api";
+import { searchCaterings } from "../../services/catalogSearchService";
 
 import CateringFeed from "../../components/catalog/CateringFeed";
 import SpecialOffers from "../../components/catalog/SpecialOffers";
+import CatalogSearchPanel from "../../components/catalog/CatalogSearchPanel";
 
 function CustomerHome() {
     const [caterings, setCaterings] = useState([]);
+    const [displayedCaterings, setDisplayedCaterings] = useState([]);
     const [offers, setOffers] = useState([]);
     const [favoriteIds, setFavoriteIds] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searching, setSearching] = useState(false);
+    const [searchActive, setSearchActive] = useState(false);
+    const [searchCount, setSearchCount] = useState(0);
     const [error, setError] = useState("");
+    const [searchError, setSearchError] = useState("");
 
     const userName = localStorage.getItem("name") || "there";
 
@@ -26,7 +33,9 @@ function CustomerHome() {
 
                 if (cancelled) return;
 
-                setCaterings(cateringRes.data.caterings || []);
+                const loadedCaterings = cateringRes.data.caterings || [];
+                setCaterings(loadedCaterings);
+                setDisplayedCaterings(loadedCaterings);
                 setOffers(offerRes.data.offers || []);
                 setFavoriteIds(favoriteRes.data.favoriteIds || []);
             } catch (err) {
@@ -45,18 +54,41 @@ function CustomerHome() {
         };
     }, []);
 
+    const handleSearch = async (filters) => {
+        setSearching(true);
+        setSearchError("");
+
+        try {
+            const result = await searchCaterings(filters);
+            const results = result.caterings || [];
+            setDisplayedCaterings(results);
+            setSearchCount(result.count || 0);
+            setSearchActive(true);
+        } catch (err) {
+            setSearchError(
+                err.response?.data?.message || "Could not complete the search."
+            );
+        } finally {
+            setSearching(false);
+        }
+    };
+
+    const handleClearSearch = () => {
+        setDisplayedCaterings(caterings);
+        setSearchActive(false);
+        setSearchCount(0);
+        setSearchError("");
+    };
+
     return (
         <div className="container mt-5">
-
             <h2 className="fw-bold">Welcome back, {userName}</h2>
 
             <p className="text-muted mb-4">
-                Browse restaurants, search foods, and discover offers here.
+                Browse caterers, search dishes, and discover offers here.
             </p>
 
-            {error && (
-                <div className="alert alert-danger">{error}</div>
-            )}
+            {error && <div className="alert alert-danger">{error}</div>}
 
             {loading && (
                 <div className="text-center text-muted my-5 py-5">
@@ -66,14 +98,46 @@ function CustomerHome() {
 
             {!loading && !error && (
                 <>
-                    <SpecialOffers offers={offers} />
+                    <CatalogSearchPanel
+                        onSearch={handleSearch}
+                        onClear={handleClearSearch}
+                        searching={searching}
+                    />
+
+                    {searchError && (
+                        <div className="alert alert-danger">{searchError}</div>
+                    )}
+
+                    {searchActive && !searchError && (
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <strong>{searchCount}</strong>{" "}
+                                {searchCount === 1 ? "caterer" : "caterers"} matched
+                                your search.
+                            </div>
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary btn-sm"
+                                onClick={handleClearSearch}
+                            >
+                                Back to full feed
+                            </button>
+                        </div>
+                    )}
+
+                    {!searchActive && <SpecialOffers offers={offers} />}
+
                     <CateringFeed
-                        caterings={caterings}
+                        caterings={displayedCaterings}
                         initialFavoriteIds={favoriteIds}
+                        emptyMessage={
+                            searchActive
+                                ? "No caterers or dishes match these search filters."
+                                : "No caterers have published listings yet."
+                        }
                     />
                 </>
             )}
-
         </div>
     );
 }
