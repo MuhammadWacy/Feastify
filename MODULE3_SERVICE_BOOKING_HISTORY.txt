@@ -1,0 +1,45 @@
+MODULE 3 - MEMBER 4 FEATURE 1
+SERVICE BOOKING HISTORY
+
+PURPOSE
+- Gives customers and caterers a separate permanent history of completed catering services.
+- Only orders whose deliveryStatus is "delivered" appear.
+- Orders enter this history only after the existing seller Delivery Verification workflow succeeds.
+
+CUSTOMER
+Navbar -> Booking History
+Route: /customer/history
+Shows:
+- Caterer name/email
+- Order type (regular, negotiated, need-based, special offer)
+- Event date and delivery date/time
+- Amount paid and payment details
+- Total servings
+- Each ordered dish and its original menu/offer image when available
+- Price per serving and item subtotal
+- Need-based custom details when applicable
+- Delivery verification photo
+
+SELLER
+Navbar -> Booking History
+Route: /seller/history
+Shows the same completed service record from the caterer's perspective, including the customer identity and all order details.
+
+BACKEND
+GET /api/service-requests/history/customer
+GET /api/service-requests/history/seller
+Both endpoints are protected and role-checked.
+Both query ServiceRequest with deliveryStatus: "delivered" and sort newest delivery first.
+
+FILES
+backend/controllers/serviceRequestController.js
+backend/routes/serviceRequestRoutes.js
+frontend/src/services/requestService.js
+frontend/src/components/history/BookingHistoryList.jsx
+frontend/src/pages/customer/CustomerBookingHistory.jsx
+frontend/src/pages/seller/SellerBookingHistory.jsx
+frontend/src/components/layout/Navbar.jsx
+frontend/src/App.jsx
+
+DATABASE
+No duplicate history collection is required. ServiceRequest already contains the authoritative completed-order data, including menu item image URLs and delivery proof image URL. The history page reads those delivered ServiceRequest documents directly.

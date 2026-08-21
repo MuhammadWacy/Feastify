@@ -240,6 +240,69 @@ const getIncomingRequests = async (req, res) => {
     }
 };
 
+
+const getCustomerBookingHistory = async (req, res) => {
+    try {
+        const customer = await User.findById(req.user.id);
+
+        if (!customer || customer.role !== "customer") {
+            return res.status(403).json({
+                success: false,
+                message: "Only customers can view customer booking history.",
+            });
+        }
+
+        const requests = await ServiceRequest.find({
+            customer: req.user.id,
+            deliveryStatus: "delivered",
+        })
+            .sort({ deliveredAt: -1, createdAt: -1 })
+            .lean();
+
+        res.status(200).json({
+            success: true,
+            count: requests.length,
+            requests,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+const getSellerBookingHistory = async (req, res) => {
+    try {
+        const seller = await User.findById(req.user.id);
+
+        if (!seller || seller.role !== "seller") {
+            return res.status(403).json({
+                success: false,
+                message: "Only caterers can view caterer booking history.",
+            });
+        }
+
+        const requests = await ServiceRequest.find({
+            seller: req.user.id,
+            deliveryStatus: "delivered",
+        })
+            .sort({ deliveredAt: -1, createdAt: -1 })
+            .lean();
+
+        res.status(200).json({
+            success: true,
+            count: requests.length,
+            requests,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
 const updateApprovalStatus = async (req, res) => {
     try {
         const seller = await User.findById(req.user.id);
@@ -537,6 +600,8 @@ module.exports = {
     createRequest,
     getMyRequests,
     getIncomingRequests,
+    getCustomerBookingHistory,
+    getSellerBookingHistory,
     updateApprovalStatus,
     markRequestPaid,
     updateOrderProgress,

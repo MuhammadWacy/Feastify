@@ -5,6 +5,8 @@ const {
     createRequest,
     getMyRequests,
     getIncomingRequests,
+    getCustomerBookingHistory,
+    getSellerBookingHistory,
     updateApprovalStatus,
     markRequestPaid,
     updateOrderProgress,
@@ -16,6 +18,8 @@ const router = express.Router();
 router.post("/", protect, createRequest);
 router.get("/my", protect, getMyRequests);
 router.get("/incoming", protect, getIncomingRequests);
+router.get("/history/customer", protect, getCustomerBookingHistory);
+router.get("/history/seller", protect, getSellerBookingHistory);
 router.patch("/:id/approval", protect, updateApprovalStatus);
 router.patch("/:id/payment", protect, markRequestPaid);
 router.patch("/:id/progress", protect, updateOrderProgress);

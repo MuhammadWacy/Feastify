@@ -19,6 +19,7 @@ import Favorites from "./pages/customer/Favorites";
 import CatererProfile from "./pages/customer/CatererProfile";
 import CustomerNeeds from "./pages/customer/CustomerNeeds";
 import FiledComplaints from "./pages/customer/FiledComplaints";
+import CustomerBookingHistory from "./pages/customer/CustomerBookingHistory";
 
 import SellerHome from "./pages/seller/SellerHome";
 import SellerDashboard from "./pages/seller/SellerDashboard";
@@ -29,6 +30,7 @@ import SellerFaqs from "./pages/seller/SellerFaqs";
 import SellerNeedDetails from "./pages/seller/SellerNeedDetails";
 import SellerSpecialOffers from "./pages/seller/SellerSpecialOffers";
 import SellerComplaints from "./pages/seller/SellerComplaints";
+import SellerBookingHistory from "./pages/seller/SellerBookingHistory";
 
 import Cart from "./pages/checkout/Cart";
 import Checkout from "./pages/checkout/Checkout";
@@ -186,6 +188,17 @@ function App() {
 
 
                 <Route
+                    path="/customer/history"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <CustomerBookingHistory />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
                     path="/customer/complaints"
                     element={
                         <ProtectedRoute allowedRole="customer">
@@ -321,6 +334,17 @@ function App() {
                     }
                 />
 
+
+                <Route
+                    path="/seller/history"
+                    element={
+                        <ProtectedRoute allowedRole="seller">
+                            <Layout>
+                                <SellerBookingHistory />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
 
                 <Route
                     path="/seller/complaints"

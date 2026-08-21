@@ -50,3 +50,10 @@ export const markServiceRequestDelivered = (requestId, proofImage) => {
         },
     });
 };
+
+
+export const getCustomerBookingHistory = () =>
+    API.get("/service-requests/history/customer");
+
+export const getSellerBookingHistory = () =>
+    API.get("/service-requests/history/seller");
