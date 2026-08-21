@@ -289,6 +289,85 @@ const markRequestPaid = async (req, res) => {
 };
 
 
+
+const updateOrderProgress = async (req, res) => {
+    try {
+        const seller = await User.findById(req.user.id);
+
+        if (!seller || seller.role !== "seller") {
+            return res.status(403).json({
+                success: false,
+                message: "Only sellers can update order progress.",
+            });
+        }
+
+        const { status } = req.body;
+        const allowedStatuses = ["", "preparing", "on_the_way"];
+
+        if (!allowedStatuses.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: "Order progress must be preparing, on_the_way, or empty.",
+            });
+        }
+
+        const request = await ServiceRequest.findOne({
+            _id: req.params.id,
+            seller: req.user.id,
+        });
+
+        if (!request) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found.",
+            });
+        }
+
+        if (request.approvalStatus !== "approved") {
+            return res.status(400).json({
+                success: false,
+                message: "Only approved orders can receive progress updates.",
+            });
+        }
+
+        if (request.paymentStatus !== "paid") {
+            return res.status(400).json({
+                success: false,
+                message: "The customer must complete payment before order progress can be updated.",
+            });
+        }
+
+        if (request.deliveryStatus === "delivered") {
+            return res.status(400).json({
+                success: false,
+                message: "Delivered orders can no longer receive progress updates.",
+            });
+        }
+
+        request.orderProgressStatus = status;
+        request.orderProgressUpdatedAt = status ? new Date() : null;
+        await request.save();
+
+        const statusMessage =
+            status === "preparing"
+                ? "Order status updated to Preparing Food."
+                : status === "on_the_way"
+                    ? "Order status updated to On the Way."
+                    : "Order progress update cleared.";
+
+        res.status(200).json({
+            success: true,
+            message: statusMessage,
+            request,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
 const markRequestDelivered = async (req, res) => {
     try {
         const seller = await User.findById(req.user.id);
@@ -395,5 +474,6 @@ module.exports = {
     getIncomingRequests,
     updateApprovalStatus,
     markRequestPaid,
+    updateOrderProgress,
     markRequestDelivered,
 };

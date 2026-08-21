@@ -1,0 +1,32 @@
+FEASTIFY - MODULE 3 / MEMBER 2 / FEATURE 1
+LIVE ORDER TRACKING PROGRESS UPDATE
+
+Added statuses:
+- Preparing Food
+- On the Way / Being Delivered
+
+Behavior:
+- Existing Pending, Approved, Rejected, Payment and Delivered flows are unchanged.
+- Seller can update live progress only for approved + paid + not-yet-delivered orders.
+- If seller never selects a live progress status, customer sees the old behavior exactly as before.
+- Customer sees Preparing Food only after seller marks it.
+- Customer sees On the Way only after seller marks it.
+- Seller can clear a live update if it was selected accidentally.
+- Delivered remains controlled by the existing Delivery Verification feature with proof image and OneSignal notification.
+
+Backend:
+- backend/models/ServiceRequest.js
+  orderProgressStatus: "", "preparing", "on_the_way"
+  orderProgressUpdatedAt
+- backend/controllers/serviceRequestController.js
+  updateOrderProgress()
+- backend/routes/serviceRequestRoutes.js
+  PATCH /api/service-requests/:id/progress
+
+Frontend:
+- frontend/src/services/requestService.js
+  updateServiceRequestProgress()
+- frontend/src/pages/seller/SellerDashboard.jsx
+  seller status controls
+- frontend/src/pages/customer/OrderTracking.jsx
+  conditional live progress messages

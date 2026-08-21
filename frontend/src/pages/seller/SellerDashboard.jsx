@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
     getIncomingServiceRequests,
     updateServiceRequestApproval,
+    updateServiceRequestProgress,
 } from "../../services/requestService";
 
 const formatDate = (value) => {
@@ -15,6 +16,7 @@ function SellerDashboard() {
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
     const [updatingId, setUpdatingId] = useState("");
+    const [progressUpdatingId, setProgressUpdatingId] = useState("");
 
     const loadRequests = async () => {
         try {
@@ -63,6 +65,39 @@ function SellerDashboard() {
         } finally {
             setUpdatingId("");
         }
+    };
+
+    const updateProgress = async (requestId, status) => {
+        setProgressUpdatingId(requestId);
+        setError("");
+        setMessage("");
+
+        try {
+            const response = await updateServiceRequestProgress(requestId, status);
+
+            setRequests((current) =>
+                current.map((request) =>
+                    request._id === requestId
+                        ? response.data.request
+                        : request
+                )
+            );
+
+            setMessage(response.data.message);
+        } catch (requestError) {
+            setError(
+                requestError.response?.data?.message ||
+                    "Could not update the order progress."
+            );
+        } finally {
+            setProgressUpdatingId("");
+        }
+    };
+
+    const progressLabel = (status) => {
+        if (status === "preparing") return "Preparing Food";
+        if (status === "on_the_way") return "On the Way";
+        return "No live update";
     };
 
     const badgeClass = (status) => {
@@ -233,8 +268,73 @@ function SellerDashboard() {
                                         This request has been rejected.
                                     </div>
                                 ) : request.paymentStatus === "paid" ? (
-                                    <div className="alert alert-primary mb-0 mt-3">
-                                        This request has been approved and paid.
+                                    <div className="mt-3">
+                                        <div className="alert alert-primary mb-3">
+                                            This request has been approved and paid.
+                                        </div>
+
+                                        {request.deliveryStatus !== "delivered" ? (
+                                            <div className="border rounded p-3 bg-light">
+                                                <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                                    <div>
+                                                        <strong>Live Order Status</strong>
+                                                        <div className="small text-muted">
+                                                            Update the customer only when there is a real preparation or delivery progress change.
+                                                        </div>
+                                                    </div>
+                                                    <span className={`badge ${
+                                                        request.orderProgressStatus === "preparing"
+                                                            ? "bg-warning text-dark"
+                                                            : request.orderProgressStatus === "on_the_way"
+                                                                ? "bg-info text-dark"
+                                                                : "bg-secondary"
+                                                    }`}>
+                                                        {progressLabel(request.orderProgressStatus)}
+                                                    </span>
+                                                </div>
+
+                                                <div className="d-flex flex-wrap gap-2">
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-warning"
+                                                        disabled={
+                                                            progressUpdatingId === request._id ||
+                                                            request.orderProgressStatus === "preparing"
+                                                        }
+                                                        onClick={() => updateProgress(request._id, "preparing")}
+                                                    >
+                                                        Mark Preparing Food
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-info"
+                                                        disabled={
+                                                            progressUpdatingId === request._id ||
+                                                            request.orderProgressStatus === "on_the_way"
+                                                        }
+                                                        onClick={() => updateProgress(request._id, "on_the_way")}
+                                                    >
+                                                        Mark On the Way
+                                                    </button>
+
+                                                    {request.orderProgressStatus && (
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-outline-secondary"
+                                                            disabled={progressUpdatingId === request._id}
+                                                            onClick={() => updateProgress(request._id, "")}
+                                                        >
+                                                            Clear Live Update
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="alert alert-success mb-0">
+                                                Delivery has already been completed.
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="alert alert-success mb-0 mt-3">

@@ -124,6 +124,16 @@ const serviceRequestSchema = new mongoose.Schema(
             type: Date,
             default: null,
         },
+        orderProgressStatus: {
+            type: String,
+            enum: ["", "preparing", "on_the_way"],
+            default: "",
+            index: true,
+        },
+        orderProgressUpdatedAt: {
+            type: Date,
+            default: null,
+        },
         deliveryStatus: {
             type: String,
             enum: ["not_delivered", "delivered"],

@@ -34,6 +34,11 @@ export const markServiceRequestPaid = (
         paymentReference,
     });
 
+export const updateServiceRequestProgress = (requestId, status) =>
+    API.patch(`/service-requests/${requestId}/progress`, {
+        status,
+    });
+
 export const markServiceRequestDelivered = (requestId, proofImage) => {
     const formData = new FormData();
     formData.append("proofImage", proofImage);

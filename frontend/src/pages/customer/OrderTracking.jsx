@@ -385,11 +385,37 @@ function OrderTracking() {
                                     {request.approvalStatus === "approved" &&
                                         request.paymentStatus === "paid" &&
                                         request.deliveryStatus !== "delivered" && (
-                                            <div className="alert alert-primary mb-0">
-                                                <strong>Payment completed.</strong>
-                                                <div className="small">
-                                                    The caterer will update this order after delivery or handover.
+                                            <div className="d-grid gap-2">
+                                                <div className="alert alert-primary mb-0">
+                                                    <strong>Payment completed.</strong>
+                                                    <div className="small">
+                                                        The caterer will update this order after delivery or handover.
+                                                    </div>
                                                 </div>
+
+                                                {request.orderProgressStatus === "preparing" && (
+                                                    <div className="alert alert-warning mb-0">
+                                                        <strong>Food is being prepared.</strong>
+                                                        <div className="small">
+                                                            The caterer has started preparing your order
+                                                            {request.orderProgressUpdatedAt
+                                                                ? ` · Updated ${new Date(request.orderProgressUpdatedAt).toLocaleString()}`
+                                                                : ""}.
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {request.orderProgressStatus === "on_the_way" && (
+                                                    <div className="alert alert-info mb-0">
+                                                        <strong>Your order is on the way.</strong>
+                                                        <div className="small">
+                                                            The caterer has marked the food as being delivered
+                                                            {request.orderProgressUpdatedAt
+                                                                ? ` · Updated ${new Date(request.orderProgressUpdatedAt).toLocaleString()}`
+                                                                : ""}.
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
 
