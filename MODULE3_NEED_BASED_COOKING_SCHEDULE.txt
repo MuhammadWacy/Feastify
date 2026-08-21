@@ -1,0 +1,56 @@
+Feastify - Module 3 / Member 2 / Feature 2
+Listing Need-Based Cooking Schedule
+
+CUSTOMER FLOW
+1. Customer opens Navbar -> Post a Need.
+2. Customer posts event name/date, dish, preparation details, servings, price per serving, delivery location, contact number and optional notes.
+3. The post is stored in MongoDB as a NeedPost with status=open.
+4. Customer can see their own posts and cancel an open post.
+5. When a caterer confirms the need, it becomes an approved ServiceRequest automatically.
+6. Customer opens Orders / Live Order Tracking and pays exactly like a normal approved order.
+7. Existing payment, preparing/on-the-way progress, delivery verification, proof photo and OneSignal notification continue to work.
+
+SELLER FLOW
+1. Seller Home is now also the Customer Need Feed.
+2. Open needs are sorted by eventDate ascending, so earlier requirements appear first.
+3. Clicking a card opens a dedicated detail page.
+4. Seller confirms the need.
+5. Backend atomically claims the NeedPost, creates an approved need_based ServiceRequest, and links the two.
+6. The accepted order appears on Seller Dashboard with the customer's custom instructions and delivery/contact details.
+
+BACKEND FILES
+backend/models/NeedPost.js
+backend/models/ServiceRequest.js
+backend/controllers/needPostController.js
+backend/routes/needPostRoutes.js
+backend/server.js
+
+FRONTEND FILES
+frontend/src/services/needPostService.js
+frontend/src/pages/customer/CustomerNeeds.jsx
+frontend/src/pages/seller/SellerHome.jsx
+frontend/src/pages/seller/SellerNeedDetails.jsx
+frontend/src/pages/customer/OrderTracking.jsx
+frontend/src/pages/seller/SellerDashboard.jsx
+frontend/src/components/payment/BookingSummary.jsx
+frontend/src/components/layout/Navbar.jsx
+frontend/src/App.jsx
+frontend/src/index.css
+
+NEW API ROUTES
+POST  /api/needs
+GET   /api/needs/my
+GET   /api/needs/open
+GET   /api/needs/:id
+PATCH /api/needs/:id/accept
+PATCH /api/needs/:id/cancel
+
+INTEGRATION
+Accepted customer need
+-> ServiceRequest approvalStatus=approved
+-> sourceType=need_based
+-> customer payment
+-> seller Preparing / On the Way status
+-> Delivery Verification
+-> Cloudinary proof image
+-> OneSignal customer notification

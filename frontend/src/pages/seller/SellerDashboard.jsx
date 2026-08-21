@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
     getIncomingServiceRequests,
     updateServiceRequestApproval,
@@ -11,10 +12,11 @@ const formatDate = (value) => {
 };
 
 function SellerDashboard() {
+    const location = useLocation();
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [message, setMessage] = useState("");
+    const [message, setMessage] = useState(location.state?.successMessage || "");
     const [updatingId, setUpdatingId] = useState("");
     const [progressUpdatingId, setProgressUpdatingId] = useState("");
 
@@ -138,9 +140,14 @@ function SellerDashboard() {
                             <div className="card-body p-4">
                                 <div className="d-flex flex-wrap justify-content-between gap-3 mb-4">
                                     <div>
-                                        <h4 className="fw-bold mb-1">
-                                            {request.customerName}
-                                        </h4>
+                                        <div className="d-flex flex-wrap align-items-center gap-2">
+                                            <h4 className="fw-bold mb-1">
+                                                {request.customerName}
+                                            </h4>
+                                            {request.sourceType === "need_based" && (
+                                                <span className="badge bg-dark mb-1">Need-Based Order</span>
+                                            )}
+                                        </div>
                                         <div className="text-muted">
                                             {request.customerEmail}
                                         </div>
@@ -178,6 +185,42 @@ function SellerDashboard() {
                                         </div>
                                     </div>
                                 </div>
+
+                                {request.sourceType === "need_based" && request.needBasedDetails && (
+                                    <div className="card bg-light border-0 mb-4">
+                                        <div className="card-body">
+                                            <h5 className="fw-bold mb-3">Customer Custom Cooking Details</h5>
+                                            <div className="row g-3 small">
+                                                <div className="col-md-4">
+                                                    <strong>Event</strong>
+                                                    <div>{request.needBasedDetails.eventName || "Custom event"}</div>
+                                                </div>
+                                                <div className="col-md-4">
+                                                    <strong>Delivery Location</strong>
+                                                    <div>{request.needBasedDetails.deliveryLocation || "-"}</div>
+                                                </div>
+                                                <div className="col-md-4">
+                                                    <strong>Contact Number</strong>
+                                                    <div>{request.needBasedDetails.contactNumber || "-"}</div>
+                                                </div>
+                                                <div className="col-12">
+                                                    <strong>Preparation Details</strong>
+                                                    <div style={{ whiteSpace: "pre-wrap" }}>
+                                                        {request.needBasedDetails.preparationDetails || "-"}
+                                                    </div>
+                                                </div>
+                                                {request.needBasedDetails.additionalNotes && (
+                                                    <div className="col-12">
+                                                        <strong>Additional Notes</strong>
+                                                        <div style={{ whiteSpace: "pre-wrap" }}>
+                                                            {request.needBasedDetails.additionalNotes}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="table-responsive">
                                     <table className="table align-middle">

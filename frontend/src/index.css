@@ -440,3 +440,29 @@ body {
     border-radius: 0.5rem;
     background: #fff7f2;
 }
+
+/* Module 3 - need based cooking schedule */
+.need-feed-card {
+    background: #fff;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.need-feed-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12) !important;
+}
+
+.need-card-icon {
+    width: 54px;
+    height: 54px;
+    font-size: 1.6rem;
+}
+
+.need-card-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 4.5em;
+}
