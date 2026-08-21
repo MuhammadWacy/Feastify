@@ -6,6 +6,7 @@ export const createServiceRequest = (booking) =>
         sellerId: booking.sellerId,
         eventDate: booking.date,
         items: booking.items,
+        specialOfferId: booking.specialOfferId || null,
     });
 
 export const getMyServiceRequests = () =>

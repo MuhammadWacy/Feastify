@@ -466,3 +466,20 @@ body {
     overflow: hidden;
     min-height: 4.5em;
 }
+
+/* Module 3 - seller special offers */
+.special-offer-card-placeholder {
+    min-height: 190px;
+    background: linear-gradient(135deg, #fff4d6, #f8f9fa);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #8a6512;
+}
+
+.special-offer-image-placeholder {
+    min-height: 260px;
+    background: linear-gradient(135deg, #fff4d6, #f8f9fa);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #8a6512;
+}

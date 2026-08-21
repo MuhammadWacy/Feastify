@@ -221,11 +221,15 @@ const getOffers = async (req, res) => {
     try {
         const offers = await Offer.find({
             validUntil: { $gte: new Date() },
+            isActive: true,
+            pricePerServing: { $exists: true },
+            minServings: { $exists: true },
+            maxServings: { $exists: true },
         })
             .populate({
                 path: "catering",
                 match: { isPublished: true, owner: { $ne: null } },
-                select: "name bannerImage area cuisine rating negotiationEnabled",
+                select: "name bannerImage area cuisine rating negotiationEnabled owner email availableDays",
             })
             .sort({ createdAt: -1 });
 

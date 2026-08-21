@@ -1,6 +1,7 @@
 const ServiceRequest = require("../models/ServiceRequest");
 const User = require("../models/User");
 const Catering = require("../models/Catering");
+const Offer = require("../models/Offer");
 const cloudinary = require("../config/cloudinary");
 const { sendDeliveryNotification } = require("../services/oneSignalService");
 
@@ -36,7 +37,7 @@ const parseEventDate = (value) => {
 
 const createRequest = async (req, res) => {
     try {
-        const { cateringId, sellerId, eventDate, items } = req.body;
+        const { cateringId, sellerId, eventDate, items, specialOfferId } = req.body;
 
         if (!cateringId || !sellerId || !eventDate || !Array.isArray(items) || items.length === 0) {
             return res.status(400).json({
@@ -101,6 +102,68 @@ const createRequest = async (req, res) => {
             });
         }
 
+        let specialOffer = null;
+
+        if (specialOfferId) {
+            specialOffer = await Offer.findOne({
+                _id: specialOfferId,
+                catering: catering._id,
+                isActive: true,
+            });
+
+            if (!specialOffer) {
+                return res.status(404).json({
+                    success: false,
+                    message: "This special offer is no longer available.",
+                });
+            }
+
+            const expiry = new Date(specialOffer.validUntil);
+            expiry.setHours(23, 59, 59, 999);
+            const now = new Date();
+            if (now > expiry) {
+                return res.status(400).json({
+                    success: false,
+                    message: "This special offer has expired.",
+                });
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (parsedEventDate < today) {
+                return res.status(400).json({
+                    success: false,
+                    message: "The event date cannot be in the past.",
+                });
+            }
+
+            if (parsedEventDate > expiry) {
+                return res.status(400).json({
+                    success: false,
+                    message: "The selected date is outside this offer's validity period.",
+                });
+            }
+
+            if (cleanItems.length !== 1) {
+                return res.status(400).json({
+                    success: false,
+                    message: "A special offer request must contain the selected special only.",
+                });
+            }
+
+            const item = cleanItems[0];
+            if (item.servings < specialOffer.minServings || item.servings > specialOffer.maxServings) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Servings must be between ${specialOffer.minServings} and ${specialOffer.maxServings} for this offer.`,
+                });
+            }
+
+            item.foodName = specialOffer.title;
+            item.image = specialOffer.image || "";
+            item.pricePerServing = specialOffer.pricePerServing;
+        }
+
         const payableAmount = cleanItems.reduce(
             (total, item) => total + item.pricePerServing * item.servings,
             0
@@ -117,6 +180,8 @@ const createRequest = async (req, res) => {
             eventDate: parsedEventDate,
             items: cleanItems,
             payableAmount,
+            sourceType: specialOffer ? "special_offer" : "direct",
+            specialOffer: specialOffer ? specialOffer._id : null,
         });
 
         res.status(201).json({

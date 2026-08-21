@@ -26,6 +26,7 @@ import SellerNegotiations from "./pages/seller/SellerNegotiations";
 import DeliveryVerification from "./pages/seller/DeliveryVerification";
 import SellerFaqs from "./pages/seller/SellerFaqs";
 import SellerNeedDetails from "./pages/seller/SellerNeedDetails";
+import SellerSpecialOffers from "./pages/seller/SellerSpecialOffers";
 
 import Cart from "./pages/checkout/Cart";
 import Checkout from "./pages/checkout/Checkout";
@@ -290,6 +291,17 @@ function App() {
                         <ProtectedRoute allowedRole="seller">
                             <Layout>
                                 <DeliveryVerification />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/seller/special-offers"
+                    element={
+                        <ProtectedRoute allowedRole="seller">
+                            <Layout>
+                                <SellerSpecialOffers />
                             </Layout>
                         </ProtectedRoute>
                     }

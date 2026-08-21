@@ -96,7 +96,7 @@ const serviceRequestSchema = new mongoose.Schema(
         },
         sourceType: {
             type: String,
-            enum: ["direct", "negotiation", "need_based"],
+            enum: ["direct", "negotiation", "need_based", "special_offer"],
             default: "direct",
         },
         negotiation: {
@@ -107,6 +107,11 @@ const serviceRequestSchema = new mongoose.Schema(
         needPost: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "NeedPost",
+            default: null,
+        },
+        specialOffer: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Offer",
             default: null,
         },
         needBasedDetails: {
