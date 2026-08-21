@@ -1,0 +1,58 @@
+FEASTIFY - MODULE 3 / MEMBER 4 / FEATURE 2
+VERIFIED POST-DELIVERY REVIEWS + CATERER REPLIES
+
+Customer flow
+-------------
+1. A Post Review button appears only after seller Delivery Verification marks an order delivered.
+2. Customer selects a 1-5 rating, writes a detailed review, and may upload up to 5 images.
+3. One review is allowed per delivered ServiceRequest.
+4. Review images are stored in Cloudinary.
+5. The review becomes visible on the customer-facing caterer profile.
+
+Public review privacy
+---------------------
+The public caterer profile deliberately does not expose payment amount, payment reference,
+customer email/phone/address, event date/location, or other sensitive booking fields.
+It shows only a shortened reviewer name, rating, review text/images, delivery date,
+total servings, dish names/images/details, and the caterer's public reply.
+
+Caterer flow
+------------
+Seller navbar -> Reviews
+- View verified reviews filed against the seller.
+- Reply to each review separately.
+- Update an existing reply.
+- Replies become visible underneath that review on the customer-facing caterer profile.
+
+Backend API
+-----------
+POST  /api/reviews
+GET   /api/reviews/my
+GET   /api/reviews/catering/:cateringId
+GET   /api/reviews/seller
+PATCH /api/reviews/:reviewId/reply
+
+Backend files
+-------------
+backend/models/Review.js
+backend/controllers/reviewController.js
+backend/routes/reviewRoutes.js
+backend/server.js
+
+Frontend files
+--------------
+frontend/src/services/reviewService.js
+frontend/src/pages/customer/OrderTracking.jsx
+frontend/src/pages/customer/CatererProfile.jsx
+frontend/src/pages/seller/SellerReviews.jsx
+frontend/src/components/layout/Navbar.jsx
+frontend/src/App.jsx
+frontend/src/App.css
+
+Notes
+-----
+- Review eligibility is re-validated on the backend using ServiceRequest.deliveryStatus and deliveredAt.
+- The backend ignores client-supplied order metadata and builds the public review snapshot from MongoDB.
+- Caterer rating is recalculated from verified reviews after each new review.
+- Existing complaint, booking history, delivery verification, payment, negotiation, special offer,
+  need-based order, FAQ, favorites, search, weather, and AI Assistant flows are preserved.

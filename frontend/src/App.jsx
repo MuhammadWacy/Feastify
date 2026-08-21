@@ -31,6 +31,7 @@ import SellerNeedDetails from "./pages/seller/SellerNeedDetails";
 import SellerSpecialOffers from "./pages/seller/SellerSpecialOffers";
 import SellerComplaints from "./pages/seller/SellerComplaints";
 import SellerBookingHistory from "./pages/seller/SellerBookingHistory";
+import SellerReviews from "./pages/seller/SellerReviews";
 
 import Cart from "./pages/checkout/Cart";
 import Checkout from "./pages/checkout/Checkout";
@@ -352,6 +353,17 @@ function App() {
                         <ProtectedRoute allowedRole="seller">
                             <Layout>
                                 <SellerComplaints />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/seller/reviews"
+                    element={
+                        <ProtectedRoute allowedRole="seller">
+                            <Layout>
+                                <SellerReviews />
                             </Layout>
                         </ProtectedRoute>
                     }

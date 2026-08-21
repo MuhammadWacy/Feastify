@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { getMyServiceRequests } from "../../services/requestService";
 import { getEventWeather } from "../../services/weatherService";
 import { fileComplaint, getMyComplaints } from "../../services/complaintService";
+import { getMyReviews, postReview } from "../../services/reviewService";
 
 const formatDate = (value) => {
     if (!value) return "";
@@ -30,18 +31,29 @@ function OrderTracking() {
     const [complaintSubmitting, setComplaintSubmitting] = useState(false);
     const [complaintError, setComplaintError] = useState("");
     const [complaintFiledIds, setComplaintFiledIds] = useState(new Set());
+    const [reviewOrderId, setReviewOrderId] = useState("");
+    const [reviewRating, setReviewRating] = useState(5);
+    const [reviewDescription, setReviewDescription] = useState("");
+    const [reviewImages, setReviewImages] = useState([]);
+    const [reviewSubmitting, setReviewSubmitting] = useState(false);
+    const [reviewError, setReviewError] = useState("");
+    const [reviewedOrderIds, setReviewedOrderIds] = useState(new Set());
 
     useEffect(() => {
         const loadRequests = async () => {
             try {
                 setError("");
-                const [requestResponse, complaintResponse] = await Promise.all([
+                const [requestResponse, complaintResponse, reviewResponse] = await Promise.all([
                     getMyServiceRequests(),
                     getMyComplaints(),
+                    getMyReviews(),
                 ]);
                 setRequests(requestResponse.data.requests || []);
                 setComplaintFiledIds(
                     new Set((complaintResponse.data.complaints || []).map((item) => String(item.serviceRequest)))
+                );
+                setReviewedOrderIds(
+                    new Set((reviewResponse.data.reviews || []).map((item) => String(item.serviceRequest)))
                 );
             } catch (requestError) {
                 setError(
@@ -145,6 +157,47 @@ function OrderTracking() {
             setComplaintError(err.response?.data?.message || "Could not file complaint.");
         } finally {
             setComplaintSubmitting(false);
+        }
+    };
+
+    const resetReviewForm = () => {
+        setReviewOrderId("");
+        setReviewRating(5);
+        setReviewDescription("");
+        setReviewImages([]);
+        setReviewError("");
+    };
+
+    const handleSubmitReview = async (requestId) => {
+        if (!Number.isInteger(Number(reviewRating)) || Number(reviewRating) < 1 || Number(reviewRating) > 5) {
+            setReviewError("Please choose a rating from 1 to 5.");
+            return;
+        }
+        if (!reviewDescription.trim()) {
+            setReviewError("Please write a detailed review.");
+            return;
+        }
+        if (reviewImages.length > 5) {
+            setReviewError("You can upload up to 5 review images.");
+            return;
+        }
+
+        try {
+            setReviewSubmitting(true);
+            setReviewError("");
+            await postReview({
+                serviceRequestId: requestId,
+                rating: Number(reviewRating),
+                description: reviewDescription,
+                images: reviewImages,
+            });
+            setReviewedOrderIds((current) => new Set([...current, String(requestId)]));
+            setSuccessMessage("Review posted successfully. It is now visible on the caterer's profile.");
+            resetReviewForm();
+        } catch (err) {
+            setReviewError(err.response?.data?.message || "Could not post review.");
+        } finally {
+            setReviewSubmitting(false);
         }
     };
 
@@ -531,57 +584,143 @@ function OrderTracking() {
                                                 </div>
                                             </div>
 
-                                            {complaintFiledIds.has(String(request._id)) ? (
-                                                <div className="alert alert-secondary mb-0">
-                                                    <strong>Complaint filed for this order.</strong>
-                                                    <div className="small">Open Filed Complaints from the navbar to view the complete record.</div>
-                                                </div>
-                                            ) : (
-                                                <>
+                                            <div className="d-flex flex-wrap gap-2">
+                                                {!complaintFiledIds.has(String(request._id)) && (
                                                     <button
                                                         type="button"
-                                                        className="btn btn-outline-danger align-self-start"
+                                                        className="btn btn-outline-danger"
                                                         onClick={() => {
                                                             setComplaintOrderId(complaintOrderId === request._id ? "" : request._id);
+                                                            setReviewOrderId("");
                                                             setComplaintError("");
                                                         }}
                                                     >
                                                         {complaintOrderId === request._id ? "Close Complaint Form" : "File Complaint"}
                                                     </button>
+                                                )}
+                                                {!reviewedOrderIds.has(String(request._id)) && (
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-primary"
+                                                        onClick={() => {
+                                                            setReviewOrderId(reviewOrderId === request._id ? "" : request._id);
+                                                            setComplaintOrderId("");
+                                                            setReviewError("");
+                                                        }}
+                                                    >
+                                                        {reviewOrderId === request._id ? "Close Review Form" : "Post Review"}
+                                                    </button>
+                                                )}
+                                            </div>
 
-                                                    {complaintOrderId === request._id && (
-                                                        <div className="card border-danger-subtle">
-                                                            <div className="card-body">
-                                                                <h5 className="fw-bold">File Complaint</h5>
-                                                                <p className="text-muted small">Describe the issue with this completed delivery. You may upload up to 5 supporting images.</p>
-                                                                {complaintError && <div className="alert alert-danger py-2">{complaintError}</div>}
-                                                                <div className="mb-3">
-                                                                    <label className="form-label fw-semibold">Complaint Type</label>
-                                                                    <select className="form-select" value={complaintCategory} onChange={(e) => setComplaintCategory(e.target.value)}>
-                                                                        <option>Food Quality</option>
-                                                                        <option>Wrong or Missing Items</option>
-                                                                        <option>Late Delivery</option>
-                                                                        <option>Packaging Issue</option>
-                                                                        <option>Quantity or Serving Issue</option>
-                                                                        <option>Other</option>
-                                                                    </select>
-                                                                </div>
-                                                                <div className="mb-3">
-                                                                    <label className="form-label fw-semibold">Complaint Details</label>
-                                                                    <textarea className="form-control" rows="4" maxLength="3000" value={complaintDetails} onChange={(e) => setComplaintDetails(e.target.value)} placeholder="Explain what went wrong with the delivered order..." />
-                                                                </div>
-                                                                <div className="mb-3">
-                                                                    <label className="form-label fw-semibold">Evidence Images (optional)</label>
-                                                                    <input className="form-control" type="file" accept="image/*" multiple onChange={(e) => setComplaintImages(Array.from(e.target.files || []).slice(0, 5))} />
-                                                                    <div className="form-text">Maximum 5 images, up to 5 MB each.</div>
-                                                                </div>
-                                                                <button type="button" className="btn btn-danger" disabled={complaintSubmitting} onClick={() => handleSubmitComplaint(request._id)}>
-                                                                    {complaintSubmitting ? "Submitting..." : "Submit Complaint"}
-                                                                </button>
+                                            {complaintFiledIds.has(String(request._id)) && (
+                                                <div className="alert alert-secondary mb-0">
+                                                    <strong>Complaint filed for this order.</strong>
+                                                    <div className="small">Open Filed Complaints from the navbar to view the complete record.</div>
+                                                </div>
+                                            )}
+
+                                            {reviewedOrderIds.has(String(request._id)) && (
+                                                <div className="alert alert-info mb-0">
+                                                    <strong>Review posted for this order.</strong>
+                                                    <div className="small">Your verified review is visible to customers on this caterer's profile.</div>
+                                                </div>
+                                            )}
+
+                                            {complaintOrderId === request._id && !complaintFiledIds.has(String(request._id)) && (
+                                                <div className="card border-danger-subtle">
+                                                    <div className="card-body">
+                                                        <h5 className="fw-bold">File Complaint</h5>
+                                                        <p className="text-muted small">Describe the issue with this completed delivery. You may upload up to 5 supporting images.</p>
+                                                        {complaintError && <div className="alert alert-danger py-2">{complaintError}</div>}
+                                                        <div className="mb-3">
+                                                            <label className="form-label fw-semibold">Complaint Type</label>
+                                                            <select className="form-select" value={complaintCategory} onChange={(e) => setComplaintCategory(e.target.value)}>
+                                                                <option>Food Quality</option>
+                                                                <option>Wrong or Missing Items</option>
+                                                                <option>Late Delivery</option>
+                                                                <option>Packaging Issue</option>
+                                                                <option>Quantity or Serving Issue</option>
+                                                                <option>Other</option>
+                                                            </select>
+                                                        </div>
+                                                        <div className="mb-3">
+                                                            <label className="form-label fw-semibold">Complaint Details</label>
+                                                            <textarea className="form-control" rows="4" maxLength="3000" value={complaintDetails} onChange={(e) => setComplaintDetails(e.target.value)} placeholder="Explain what went wrong with the delivered order..." />
+                                                        </div>
+                                                        <div className="mb-3">
+                                                            <label className="form-label fw-semibold">Evidence Images (optional)</label>
+                                                            <input className="form-control" type="file" accept="image/*" multiple onChange={(e) => setComplaintImages(Array.from(e.target.files || []).slice(0, 5))} />
+                                                            <div className="form-text">Maximum 5 images, up to 5 MB each.</div>
+                                                        </div>
+                                                        <button type="button" className="btn btn-danger" disabled={complaintSubmitting} onClick={() => handleSubmitComplaint(request._id)}>
+                                                            {complaintSubmitting ? "Submitting..." : "Submit Complaint"}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {reviewOrderId === request._id && !reviewedOrderIds.has(String(request._id)) && (
+                                                <div className="card border-primary-subtle review-form-card">
+                                                    <div className="card-body">
+                                                        <h5 className="fw-bold">Post Review</h5>
+                                                        <p className="text-muted small">Rate this verified delivery and share your experience. Review images are optional.</p>
+                                                        {reviewError && <div className="alert alert-danger py-2">{reviewError}</div>}
+
+                                                        <div className="mb-3">
+                                                            <label className="form-label fw-semibold">Rating</label>
+                                                            <select
+                                                                className="form-select"
+                                                                value={reviewRating}
+                                                                onChange={(event) => setReviewRating(Number(event.target.value))}
+                                                            >
+                                                                <option value={5}>5 - Excellent</option>
+                                                                <option value={4}>4 - Very Good</option>
+                                                                <option value={3}>3 - Good</option>
+                                                                <option value={2}>2 - Fair</option>
+                                                                <option value={1}>1 - Poor</option>
+                                                            </select>
+                                                            <div className="review-rating-preview mt-2" aria-label={`${reviewRating} out of 5 stars`}>
+                                                                {Array.from({ length: 5 }, (_, index) => (
+                                                                    <span key={index}>{index < reviewRating ? "★" : "☆"}</span>
+                                                                ))}
                                                             </div>
                                                         </div>
-                                                    )}
-                                                </>
+
+                                                        <div className="mb-3">
+                                                            <label className="form-label fw-semibold">Review Details</label>
+                                                            <textarea
+                                                                className="form-control"
+                                                                rows="4"
+                                                                maxLength="2500"
+                                                                value={reviewDescription}
+                                                                onChange={(event) => setReviewDescription(event.target.value)}
+                                                                placeholder="How was the food, service, portion size, packaging and overall delivery experience?"
+                                                            />
+                                                        </div>
+
+                                                        <div className="mb-3">
+                                                            <label className="form-label fw-semibold">Review Images (optional)</label>
+                                                            <input
+                                                                className="form-control"
+                                                                type="file"
+                                                                accept="image/*"
+                                                                multiple
+                                                                onChange={(event) => setReviewImages(Array.from(event.target.files || []).slice(0, 5))}
+                                                            />
+                                                            <div className="form-text">Maximum 5 images, up to 5 MB each.</div>
+                                                        </div>
+
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-primary"
+                                                            disabled={reviewSubmitting}
+                                                            onClick={() => handleSubmitReview(request._id)}
+                                                        >
+                                                            {reviewSubmitting ? "Posting..." : "Submit Review"}
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             )}
                                         </div>
                                     )}

@@ -10,9 +10,19 @@ import {
     askCatererQuestion,
     getCateringFaqs,
 } from "../../services/faqService";
+import { getCateringReviews } from "../../services/reviewService";
 
 const formatMoney = (value) => `৳${Number(value || 0).toFixed(2)}`;
 const formatDateTime = (value) => (value ? new Date(value).toLocaleString() : "");
+const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : "");
+
+const Stars = ({ rating }) => (
+    <span className="review-stars" aria-label={`${rating} out of 5 stars`}>
+        {Array.from({ length: 5 }, (_, index) => (
+            <span key={index}>{index < Math.round(Number(rating || 0)) ? "★" : "☆"}</span>
+        ))}
+    </span>
+);
 
 function CatererProfile() {
     const { cateringId } = useParams();
@@ -21,6 +31,8 @@ function CatererProfile() {
     const [catering, setCatering] = useState(null);
     const [items, setItems] = useState([]);
     const [faqs, setFaqs] = useState([]);
+    const [reviews, setReviews] = useState([]);
+    const [ratingSummary, setRatingSummary] = useState({ average: 0, count: 0 });
     const [question, setQuestion] = useState("");
     const [postingQuestion, setPostingQuestion] = useState(false);
     const [faqMessage, setFaqMessage] = useState("");
@@ -34,10 +46,11 @@ function CatererProfile() {
 
         const loadProfile = async () => {
             try {
-                const [profileResponse, favoriteData, faqData] = await Promise.all([
+                const [profileResponse, favoriteData, faqData, reviewResponse] = await Promise.all([
                     API.get(`/catalog/caterings/${cateringId}/profile`),
                     getFavorites(),
                     getCateringFaqs(cateringId),
+                    getCateringReviews(cateringId),
                 ]);
 
                 if (cancelled) return;
@@ -45,6 +58,8 @@ function CatererProfile() {
                 setCatering(profileResponse.data.catering);
                 setItems(profileResponse.data.items || []);
                 setFaqs(faqData.faqs || []);
+                setReviews(reviewResponse.data.reviews || []);
+                setRatingSummary(reviewResponse.data.ratingSummary || { average: 0, count: 0 });
                 setIsFavorite(
                     (favoriteData.favoriteIds || []).includes(String(cateringId))
                 );
@@ -153,7 +168,10 @@ function CatererProfile() {
                             <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
                                 <h2 className="fw-bold mb-0">{catering.name}</h2>
                                 <span className="badge bg-primary">
-                                    ⭐ {Number(catering.rating || 0).toFixed(1)}
+                                    ⭐ {Number(ratingSummary.count ? ratingSummary.average : catering.rating || 0).toFixed(1)}
+                                </span>
+                                <span className="small text-muted">
+                                    {ratingSummary.count} verified {ratingSummary.count === 1 ? "review" : "reviews"}
                                 </span>
                             </div>
 
@@ -349,17 +367,103 @@ function CatererProfile() {
                 </div>
             </section>
 
-            <section className="card border-0 shadow-sm review-placeholder-card">
+            <section className="card border-0 shadow-sm review-section-card">
                 <div className="card-body p-4">
-                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div className="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
                         <div>
                             <h3 className="fw-bold mb-1">Customer Reviews</h3>
                             <p className="text-muted mb-0">
-                                This section is reserved for the upcoming review system.
+                                Reviews shown here come only from orders completed through delivery verification.
                             </p>
                         </div>
-                        <span className="badge text-bg-light">Coming soon</span>
+                        <div className="review-summary-box text-center">
+                            <div className="display-6 fw-bold mb-0">{Number(ratingSummary.average || 0).toFixed(1)}</div>
+                            <Stars rating={ratingSummary.average || 0} />
+                            <div className="small text-muted mt-1">
+                                {ratingSummary.count} verified {ratingSummary.count === 1 ? "review" : "reviews"}
+                            </div>
+                        </div>
                     </div>
+
+                    {reviews.length === 0 ? (
+                        <div className="text-center text-muted py-4">
+                            No verified reviews have been posted for this caterer yet.
+                        </div>
+                    ) : (
+                        <div className="d-grid gap-4">
+                            {reviews.map((review) => (
+                                <article className="public-review-card" key={review._id}>
+                                    <div className="d-flex flex-wrap justify-content-between gap-3 mb-3">
+                                        <div>
+                                            <div className="d-flex align-items-center gap-2 flex-wrap">
+                                                <strong>{review.reviewerName}</strong>
+                                                <span className="badge bg-success-subtle text-success-emphasis border border-success-subtle">
+                                                    Verified delivery
+                                                </span>
+                                            </div>
+                                            <div className="small text-muted mt-1">
+                                                Delivered {formatDate(review.deliveredAt)} · {review.totalServings} total servings
+                                            </div>
+                                        </div>
+                                        <div className="text-md-end">
+                                            <Stars rating={review.rating} />
+                                            <div className="small text-muted">Posted {formatDate(review.createdAt)}</div>
+                                        </div>
+                                    </div>
+
+                                    <p className="mb-3" style={{ whiteSpace: "pre-wrap" }}>{review.description}</p>
+
+                                    <div className="row g-3 mb-3">
+                                        {(review.items || []).map((item, index) => (
+                                            <div className="col-md-6" key={`${review._id}-${item.foodName}-${index}`}>
+                                                <div className="review-dish-card h-100">
+                                                    {item.image ? (
+                                                        <img src={item.image} alt={item.foodName} />
+                                                    ) : (
+                                                        <div className="review-dish-placeholder">Food</div>
+                                                    )}
+                                                    <div>
+                                                        <strong>{item.foodName}</strong>
+                                                        <div className="small text-muted">{item.servings} servings</div>
+                                                        {item.details && (
+                                                            <div className="small mt-1">{item.details}</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {(review.images || []).length > 0 && (
+                                        <div className="review-image-grid mb-3">
+                                            {review.images.map((image, index) => (
+                                                <a
+                                                    href={image.url}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    key={image.publicId || `${review._id}-${index}`}
+                                                >
+                                                    <img src={image.url} alt={`Customer review ${index + 1}`} />
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {review.sellerReply && (
+                                        <div className="public-review-reply">
+                                            <div className="d-flex justify-content-between flex-wrap gap-2 mb-1">
+                                                <strong>Response from {catering.name}</strong>
+                                                {review.sellerRepliedAt && (
+                                                    <small className="text-muted">{formatDateTime(review.sellerRepliedAt)}</small>
+                                                )}
+                                            </div>
+                                            <p className="mb-0" style={{ whiteSpace: "pre-wrap" }}>{review.sellerReply}</p>
+                                        </div>
+                                    )}
+                                </article>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
         </div>
