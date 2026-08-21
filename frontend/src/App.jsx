@@ -17,6 +17,7 @@ import CustomerNegotiations from "./pages/customer/CustomerNegotiations";
 import AIAssistant from "./pages/customer/AIAssistant";
 import Favorites from "./pages/customer/Favorites";
 import CatererProfile from "./pages/customer/CatererProfile";
+import CustomerNeeds from "./pages/customer/CustomerNeeds";
 
 import SellerHome from "./pages/seller/SellerHome";
 import SellerDashboard from "./pages/seller/SellerDashboard";
@@ -24,6 +25,7 @@ import SellerListing from "./pages/seller/SellerListing";
 import SellerNegotiations from "./pages/seller/SellerNegotiations";
 import DeliveryVerification from "./pages/seller/DeliveryVerification";
 import SellerFaqs from "./pages/seller/SellerFaqs";
+import SellerNeedDetails from "./pages/seller/SellerNeedDetails";
 
 import Cart from "./pages/checkout/Cart";
 import Checkout from "./pages/checkout/Checkout";
@@ -169,6 +171,17 @@ function App() {
                 />
 
                 <Route
+                    path="/customer/needs"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <CustomerNeeds />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
                     path="/customer/cart"
                     element={
                         <ProtectedRoute allowedRole="customer">
@@ -233,6 +246,17 @@ function App() {
                         <ProtectedRoute allowedRole="seller">
                             <Layout>
                                 <SellerDashboard />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/seller/needs/:needId"
+                    element={
+                        <ProtectedRoute allowedRole="seller">
+                            <Layout>
+                                <SellerNeedDetails />
                             </Layout>
                         </ProtectedRoute>
                     }

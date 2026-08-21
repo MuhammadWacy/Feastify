@@ -213,6 +213,16 @@ function Navbar() {
                                         <li className="nav-item">
                                             <Link
                                                 className={`nav-link text-white ${activeClass(
+                                                    "/customer/needs"
+                                                )}`}
+                                                to="/customer/needs"
+                                            >
+                                                Post a Need
+                                            </Link>
+                                        </li>
+                                        <li className="nav-item">
+                                            <Link
+                                                className={`nav-link text-white ${activeClass(
                                                     "/customer/assistant"
                                                 )}`}
                                                 to="/customer/assistant"

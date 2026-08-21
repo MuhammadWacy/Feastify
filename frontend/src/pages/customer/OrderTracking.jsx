@@ -148,9 +148,14 @@ function OrderTracking() {
                                 <div className="card-body p-4">
                                     <div className="d-flex flex-wrap justify-content-between gap-3 mb-3">
                                         <div>
-                                            <h4 className="fw-bold mb-1">
-                                                {request.sellerName}
-                                            </h4>
+                                            <div className="d-flex flex-wrap align-items-center gap-2">
+                                                <h4 className="fw-bold mb-1">
+                                                    {request.sellerName}
+                                                </h4>
+                                                {request.sourceType === "need_based" && (
+                                                    <span className="badge bg-dark mb-1">Need-Based Order</span>
+                                                )}
+                                            </div>
                                             <div className="text-muted small">
                                                 {request.sellerEmail}
                                             </div>
@@ -190,6 +195,42 @@ function OrderTracking() {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {request.sourceType === "need_based" && request.needBasedDetails && (
+                                        <div className="card border-primary-subtle mb-3">
+                                            <div className="card-body">
+                                                <h5 className="fw-bold mb-3">Your Custom Cooking Request</h5>
+                                                <div className="row g-3 small">
+                                                    <div className="col-md-6">
+                                                        <strong>Event</strong>
+                                                        <div>{request.needBasedDetails.eventName || "Custom event"}</div>
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <strong>Delivery Location</strong>
+                                                        <div>{request.needBasedDetails.deliveryLocation || "-"}</div>
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                        <strong>Contact Number</strong>
+                                                        <div>{request.needBasedDetails.contactNumber || "-"}</div>
+                                                    </div>
+                                                    <div className="col-12">
+                                                        <strong>Preparation Details</strong>
+                                                        <div style={{ whiteSpace: "pre-wrap" }}>
+                                                            {request.needBasedDetails.preparationDetails || "-"}
+                                                        </div>
+                                                    </div>
+                                                    {request.needBasedDetails.additionalNotes && (
+                                                        <div className="col-12">
+                                                            <strong>Additional Notes</strong>
+                                                            <div style={{ whiteSpace: "pre-wrap" }}>
+                                                                {request.needBasedDetails.additionalNotes}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {request.approvalStatus === "approved" && (
                                         <div className="card bg-light border-0 mb-3">

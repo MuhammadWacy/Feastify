@@ -96,13 +96,45 @@ const serviceRequestSchema = new mongoose.Schema(
         },
         sourceType: {
             type: String,
-            enum: ["direct", "negotiation"],
+            enum: ["direct", "negotiation", "need_based"],
             default: "direct",
         },
         negotiation: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Negotiation",
             default: null,
+        },
+        needPost: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "NeedPost",
+            default: null,
+        },
+        needBasedDetails: {
+            eventName: {
+                type: String,
+                default: "",
+                trim: true,
+            },
+            preparationDetails: {
+                type: String,
+                default: "",
+                trim: true,
+            },
+            deliveryLocation: {
+                type: String,
+                default: "",
+                trim: true,
+            },
+            contactNumber: {
+                type: String,
+                default: "",
+                trim: true,
+            },
+            additionalNotes: {
+                type: String,
+                default: "",
+                trim: true,
+            },
         },
         paymentStatus: {
             type: String,

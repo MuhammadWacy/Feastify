@@ -24,7 +24,7 @@ function BookingSummary({ booking }) {
 
                     <p className="mb-1">
                         <strong>Event Date:</strong>{" "}
-                        {booking.bookingDate}
+                        {booking.bookingDate || booking.date}
                     </p>
 
                     <p className="mb-0">
@@ -47,16 +47,31 @@ function BookingSummary({ booking }) {
                             className="d-flex align-items-center gap-3 mb-4"
                         >
 
-                            <img
-                                src={item.image}
-                                alt={item.foodName}
-                                style={{
-                                    width: "90px",
-                                    height: "70px",
-                                    objectFit: "cover",
-                                    borderRadius: "10px",
-                                }}
-                            />
+                            {item.image ? (
+                                <img
+                                    src={item.image}
+                                    alt={item.foodName}
+                                    style={{
+                                        width: "90px",
+                                        height: "70px",
+                                        objectFit: "cover",
+                                        borderRadius: "10px",
+                                    }}
+                                />
+                            ) : (
+                                <div
+                                    className="d-flex align-items-center justify-content-center border rounded bg-light"
+                                    style={{
+                                        width: "90px",
+                                        height: "70px",
+                                        fontSize: "1.7rem",
+                                        flexShrink: 0,
+                                    }}
+                                    aria-label="Custom dish without a listing photo"
+                                >
+                                    🍲
+                                </div>
+                            )}
 
                             <div className="flex-grow-1">
 
