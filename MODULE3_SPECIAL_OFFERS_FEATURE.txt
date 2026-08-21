@@ -1,0 +1,50 @@
+FEASTIFY - MODULE 3 / MEMBER 3 / FEATURE 1
+SPECIAL OFFERS
+
+SELLER FLOW
+- Seller navbar -> Special Offers.
+- Seller must already have a published catering listing.
+- Seller can create, edit, pause/reactivate, and delete a special offer.
+- Offer fields: name, details, price per serving, minimum servings, maximum servings, validity date, and optional image.
+- Images are uploaded to Cloudinary and their URL/public ID are stored in MongoDB.
+
+CUSTOMER FLOW
+- Active, unexpired offers from published caterers appear in the Special Offers section of Customer Home.
+- Customer opens an offer, selects servings within the seller's range and an event/delivery date within the validity period.
+- Existing caterer operating-day restrictions are also respected.
+- The offer is added to the existing Feastify cart.
+- Request Service creates the normal pending ServiceRequest for that seller.
+- Seller can approve/reject it as usual.
+- If approved, customer can pay, seller can mark Preparing / On the Way, and Delivery Verification works exactly as for regular orders.
+
+BACKEND
+- backend/models/Offer.js
+- backend/controllers/specialOfferController.js
+- backend/routes/specialOfferRoutes.js
+- backend/controllers/catalogController.js
+- backend/controllers/serviceRequestController.js
+- backend/models/ServiceRequest.js
+- backend/server.js
+
+SELLER API
+GET    /api/special-offers/mine
+POST   /api/special-offers
+PUT    /api/special-offers/:id
+DELETE /api/special-offers/:id
+
+CUSTOMER CATALOG
+GET /api/catalog/offers
+
+ORDER INTEGRATION
+POST /api/service-requests
+- specialOfferId is included for special-offer bookings.
+- Backend re-checks that the offer exists, is active, has not expired, the event date is within validity, serving quantity is within the offer range, and the price/title/image are taken from MongoDB rather than trusting the browser.
+
+FRONTEND
+- frontend/src/pages/seller/SellerSpecialOffers.jsx
+- frontend/src/services/specialOfferService.js
+- frontend/src/components/catalog/SpecialOffers.jsx
+- frontend/src/components/catalog/SpecialOfferOrderModal.jsx
+- frontend/src/services/requestService.js
+- frontend/src/components/layout/Navbar.jsx
+- frontend/src/App.jsx

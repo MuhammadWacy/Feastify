@@ -1,0 +1,34 @@
+MODULE 3 - MEMBER 3 FEATURE 2: POST-DELIVERY COMPLAINTS
+
+Customer flow:
+Delivered order -> File Complaint -> dropdown form -> category + details + up to 5 images -> MongoDB Complaint record -> Filed Complaints page.
+
+Seller flow:
+Seller navbar -> Complaints -> see all complaints filed against that seller with customer, event, delivery, payment, serving, item, detail and evidence information.
+
+Rules:
+- Only authenticated customers can file complaints.
+- Order must belong to the customer and already be delivered.
+- One complaint is allowed per delivered service request.
+- Images are optional, image-only, maximum 5 files and 5 MB each.
+- Evidence is stored in Cloudinary; MongoDB stores URLs/public IDs.
+- Complaint snapshots preserve event date, delivery date, amount paid, servings and item information even if other order data changes later.
+
+Backend:
+backend/models/Complaint.js
+backend/controllers/complaintController.js
+backend/routes/complaintRoutes.js
+backend/server.js
+
+Frontend:
+frontend/src/services/complaintService.js
+frontend/src/pages/customer/OrderTracking.jsx
+frontend/src/pages/customer/FiledComplaints.jsx
+frontend/src/pages/seller/SellerComplaints.jsx
+frontend/src/components/layout/Navbar.jsx
+frontend/src/App.jsx
+
+API:
+POST /api/complaints
+GET  /api/complaints/my
+GET  /api/complaints/seller
