@@ -262,6 +262,16 @@ function Navbar() {
                                         <li className="nav-item">
                                             <Link
                                                 className={`nav-link text-white ${activeClass(
+                                                    "/customer/complaints"
+                                                )}`}
+                                                to="/customer/complaints"
+                                            >
+                                                Filed Complaints
+                                            </Link>
+                                        </li>
+                                        <li className="nav-item">
+                                            <Link
+                                                className={`nav-link text-white ${activeClass(
                                                     "/customer/cart"
                                                 )}`}
                                                 to="/customer/cart"
@@ -302,6 +312,16 @@ function Navbar() {
                                                 to="/seller/special-offers"
                                             >
                                                 Special Offers
+                                            </Link>
+                                        </li>
+                                        <li className="nav-item">
+                                            <Link
+                                                className={`nav-link text-white ${activeClass(
+                                                    "/seller/complaints"
+                                                )}`}
+                                                to="/seller/complaints"
+                                            >
+                                                Complaints
                                             </Link>
                                         </li>
                                         <li className="nav-item">

@@ -18,6 +18,7 @@ import AIAssistant from "./pages/customer/AIAssistant";
 import Favorites from "./pages/customer/Favorites";
 import CatererProfile from "./pages/customer/CatererProfile";
 import CustomerNeeds from "./pages/customer/CustomerNeeds";
+import FiledComplaints from "./pages/customer/FiledComplaints";
 
 import SellerHome from "./pages/seller/SellerHome";
 import SellerDashboard from "./pages/seller/SellerDashboard";
@@ -27,6 +28,7 @@ import DeliveryVerification from "./pages/seller/DeliveryVerification";
 import SellerFaqs from "./pages/seller/SellerFaqs";
 import SellerNeedDetails from "./pages/seller/SellerNeedDetails";
 import SellerSpecialOffers from "./pages/seller/SellerSpecialOffers";
+import SellerComplaints from "./pages/seller/SellerComplaints";
 
 import Cart from "./pages/checkout/Cart";
 import Checkout from "./pages/checkout/Checkout";
@@ -182,6 +184,18 @@ function App() {
                     }
                 />
 
+
+                <Route
+                    path="/customer/complaints"
+                    element={
+                        <ProtectedRoute allowedRole="customer">
+                            <Layout>
+                                <FiledComplaints />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
                 <Route
                     path="/customer/cart"
                     element={
@@ -302,6 +316,18 @@ function App() {
                         <ProtectedRoute allowedRole="seller">
                             <Layout>
                                 <SellerSpecialOffers />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+
+                <Route
+                    path="/seller/complaints"
+                    element={
+                        <ProtectedRoute allowedRole="seller">
+                            <Layout>
+                                <SellerComplaints />
                             </Layout>
                         </ProtectedRoute>
                     }

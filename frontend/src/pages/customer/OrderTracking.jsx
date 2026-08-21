@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getMyServiceRequests } from "../../services/requestService";
 import { getEventWeather } from "../../services/weatherService";
+import { fileComplaint, getMyComplaints } from "../../services/complaintService";
 
 const formatDate = (value) => {
     if (!value) return "";
@@ -22,13 +23,26 @@ function OrderTracking() {
     const [successMessage, setSuccessMessage] = useState(
         location.state?.successMessage || ""
     );
+    const [complaintOrderId, setComplaintOrderId] = useState("");
+    const [complaintCategory, setComplaintCategory] = useState("Food Quality");
+    const [complaintDetails, setComplaintDetails] = useState("");
+    const [complaintImages, setComplaintImages] = useState([]);
+    const [complaintSubmitting, setComplaintSubmitting] = useState(false);
+    const [complaintError, setComplaintError] = useState("");
+    const [complaintFiledIds, setComplaintFiledIds] = useState(new Set());
 
     useEffect(() => {
         const loadRequests = async () => {
             try {
                 setError("");
-                const response = await getMyServiceRequests();
-                setRequests(response.data.requests || []);
+                const [requestResponse, complaintResponse] = await Promise.all([
+                    getMyServiceRequests(),
+                    getMyComplaints(),
+                ]);
+                setRequests(requestResponse.data.requests || []);
+                setComplaintFiledIds(
+                    new Set((complaintResponse.data.complaints || []).map((item) => String(item.serviceRequest)))
+                );
             } catch (requestError) {
                 setError(
                     requestError.response?.data?.message ||
@@ -94,6 +108,43 @@ function OrderTracking() {
             }));
         } finally {
             setWeatherLoadingId("");
+        }
+    };
+
+
+    const resetComplaintForm = () => {
+        setComplaintOrderId("");
+        setComplaintCategory("Food Quality");
+        setComplaintDetails("");
+        setComplaintImages([]);
+        setComplaintError("");
+    };
+
+    const handleSubmitComplaint = async (requestId) => {
+        if (!complaintDetails.trim()) {
+            setComplaintError("Please explain why you are filing this complaint.");
+            return;
+        }
+        if (complaintImages.length > 5) {
+            setComplaintError("You can upload up to 5 images.");
+            return;
+        }
+        try {
+            setComplaintSubmitting(true);
+            setComplaintError("");
+            await fileComplaint({
+                serviceRequestId: requestId,
+                category: complaintCategory,
+                details: complaintDetails,
+                images: complaintImages,
+            });
+            setComplaintFiledIds((current) => new Set([...current, String(requestId)]));
+            setSuccessMessage("Complaint filed successfully. You can view it from Filed Complaints.");
+            resetComplaintForm();
+        } catch (err) {
+            setComplaintError(err.response?.data?.message || "Could not file complaint.");
+        } finally {
+            setComplaintSubmitting(false);
         }
     };
 
@@ -461,36 +512,77 @@ function OrderTracking() {
                                         )}
 
                                     {request.deliveryStatus === "delivered" && (
-                                        <div className="alert alert-success mb-0">
-                                            <div className="d-flex flex-wrap justify-content-between gap-3 align-items-center">
-                                                <div>
-                                                    <strong>Order delivered.</strong>
-                                                    <div className="small">
-                                                        Delivery completed {request.deliveredAt
-                                                            ? new Date(request.deliveredAt).toLocaleString()
-                                                            : ""}.
+                                        <div className="d-grid gap-3">
+                                            <div className="alert alert-success mb-0">
+                                                <div className="d-flex flex-wrap justify-content-between gap-3 align-items-center">
+                                                    <div>
+                                                        <strong>Order delivered.</strong>
+                                                        <div className="small">
+                                                            Delivery completed {request.deliveredAt
+                                                                ? new Date(request.deliveredAt).toLocaleString()
+                                                                : ""}.
+                                                        </div>
                                                     </div>
+                                                    {request.deliveryProofImage && (
+                                                        <a href={request.deliveryProofImage} target="_blank" rel="noreferrer">
+                                                            <img src={request.deliveryProofImage} alt="Delivery proof" className="rounded" style={{ width: "110px", height: "80px", objectFit: "cover" }} />
+                                                        </a>
+                                                    )}
                                                 </div>
-
-                                                {request.deliveryProofImage && (
-                                                    <a
-                                                        href={request.deliveryProofImage}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                    >
-                                                        <img
-                                                            src={request.deliveryProofImage}
-                                                            alt="Delivery proof"
-                                                            className="rounded"
-                                                            style={{
-                                                                width: "110px",
-                                                                height: "80px",
-                                                                objectFit: "cover",
-                                                            }}
-                                                        />
-                                                    </a>
-                                                )}
                                             </div>
+
+                                            {complaintFiledIds.has(String(request._id)) ? (
+                                                <div className="alert alert-secondary mb-0">
+                                                    <strong>Complaint filed for this order.</strong>
+                                                    <div className="small">Open Filed Complaints from the navbar to view the complete record.</div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-danger align-self-start"
+                                                        onClick={() => {
+                                                            setComplaintOrderId(complaintOrderId === request._id ? "" : request._id);
+                                                            setComplaintError("");
+                                                        }}
+                                                    >
+                                                        {complaintOrderId === request._id ? "Close Complaint Form" : "File Complaint"}
+                                                    </button>
+
+                                                    {complaintOrderId === request._id && (
+                                                        <div className="card border-danger-subtle">
+                                                            <div className="card-body">
+                                                                <h5 className="fw-bold">File Complaint</h5>
+                                                                <p className="text-muted small">Describe the issue with this completed delivery. You may upload up to 5 supporting images.</p>
+                                                                {complaintError && <div className="alert alert-danger py-2">{complaintError}</div>}
+                                                                <div className="mb-3">
+                                                                    <label className="form-label fw-semibold">Complaint Type</label>
+                                                                    <select className="form-select" value={complaintCategory} onChange={(e) => setComplaintCategory(e.target.value)}>
+                                                                        <option>Food Quality</option>
+                                                                        <option>Wrong or Missing Items</option>
+                                                                        <option>Late Delivery</option>
+                                                                        <option>Packaging Issue</option>
+                                                                        <option>Quantity or Serving Issue</option>
+                                                                        <option>Other</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div className="mb-3">
+                                                                    <label className="form-label fw-semibold">Complaint Details</label>
+                                                                    <textarea className="form-control" rows="4" maxLength="3000" value={complaintDetails} onChange={(e) => setComplaintDetails(e.target.value)} placeholder="Explain what went wrong with the delivered order..." />
+                                                                </div>
+                                                                <div className="mb-3">
+                                                                    <label className="form-label fw-semibold">Evidence Images (optional)</label>
+                                                                    <input className="form-control" type="file" accept="image/*" multiple onChange={(e) => setComplaintImages(Array.from(e.target.files || []).slice(0, 5))} />
+                                                                    <div className="form-text">Maximum 5 images, up to 5 MB each.</div>
+                                                                </div>
+                                                                <button type="button" className="btn btn-danger" disabled={complaintSubmitting} onClick={() => handleSubmitComplaint(request._id)}>
+                                                                    {complaintSubmitting ? "Submitting..." : "Submit Complaint"}
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
                                         </div>
                                     )}
                                 </div>
