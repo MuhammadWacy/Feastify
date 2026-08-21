@@ -1,0 +1,30 @@
+MODULE 3 - MEMBER 1 - FEATURE 2
+Interactive Caterer FAQ
+
+Customer flow:
+Customer feed -> click caterer name -> customer-facing caterer profile -> Questions & Answers -> post question -> question saved in MongoDB -> all customers visiting that caterer profile can see it.
+
+Seller flow:
+Seller navbar -> FAQs -> see questions for own catering listing -> post/update answer -> answer saved in MongoDB -> all customers see the answer on the public profile.
+
+Backend:
+backend/models/Faq.js
+backend/controllers/faqController.js
+backend/routes/faqRoutes.js
+backend/server.js
+
+Frontend:
+frontend/src/services/faqService.js
+frontend/src/pages/customer/CatererProfile.jsx
+frontend/src/pages/seller/SellerFaqs.jsx
+frontend/src/components/catalog/CateringFeed.jsx
+frontend/src/components/catalog/CateringCard.jsx
+frontend/src/components/layout/Navbar.jsx
+frontend/src/App.jsx
+frontend/src/index.css
+
+Endpoints:
+GET   /api/faqs/catering/:cateringId
+POST  /api/faqs/catering/:cateringId
+GET   /api/faqs/seller/mine
+PATCH /api/faqs/:faqId/answer

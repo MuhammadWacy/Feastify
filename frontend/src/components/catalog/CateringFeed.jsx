@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CateringCard from "./CateringCard";
 import CateringMenuModal from "./CateringMenuModal";
 import {
@@ -26,6 +27,7 @@ function CateringFeed({
     initialFavoriteIds = [],
     emptyMessage = "No caterers have published listings yet.",
 }) {
+    const navigate = useNavigate();
     const [selected, setSelected] = useState(null);
     const [favoriteIds, setFavoriteIds] = useState(initialFavoriteIds);
     const [favoriteMessage, setFavoriteMessage] = useState("");
@@ -97,6 +99,9 @@ function CateringFeed({
                                 onSelect={setSelected}
                                 isFavorite={favoriteIds.includes(String(catering._id))}
                                 onToggleFavorite={toggleFavorite}
+                                onViewProfile={() =>
+                                    navigate(`/customer/caterers/${catering._id}`)
+                                }
                                 key={catering._id}
                             />
                         ))}

@@ -395,3 +395,48 @@ body {
         flex: 1 1 calc(50% - 0.5rem);
     }
 }
+
+/* Module 3 - Caterer FAQ */
+.caterer-name-link {
+    display: inline-block;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-align: left;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+.caterer-name-link:hover,
+.caterer-name-link:focus {
+    color: #fff;
+    opacity: 0.85;
+}
+
+.faq-section-card {
+    overflow: hidden;
+}
+
+.faq-question-form {
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background: #fff7f2;
+}
+
+.faq-public-item {
+    padding: 1rem;
+    border: 1px solid #ececec;
+    border-radius: 0.75rem;
+    background: #fff;
+}
+
+.faq-answer-box {
+    padding: 0.9rem 1rem;
+    border-left: 4px solid #ff7034;
+    border-radius: 0.5rem;
+    background: #fff7f2;
+}

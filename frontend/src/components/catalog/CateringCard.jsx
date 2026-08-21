@@ -80,7 +80,18 @@ function CateringCard({
 
                 <div className="catering-banner-overlay">
                     <div>
-                        <h5 className="mb-1 text-white">{catering.name}</h5>
+                        {onViewProfile ? (
+                            <button
+                                type="button"
+                                className="caterer-name-link mb-1"
+                                onClick={handleProfile}
+                                title={`View ${catering.name} profile`}
+                            >
+                                {catering.name}
+                            </button>
+                        ) : (
+                            <h5 className="mb-1 text-white">{catering.name}</h5>
+                        )}
                         <p className="small mb-0 text-white">
                             {catering.cuisine || "Catering"} · {catering.area}
                         </p>

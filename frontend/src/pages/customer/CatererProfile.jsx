@@ -6,8 +6,13 @@ import {
     getFavorites,
     removeFavorite,
 } from "../../services/favoriteService";
+import {
+    askCatererQuestion,
+    getCateringFaqs,
+} from "../../services/faqService";
 
 const formatMoney = (value) => `৳${Number(value || 0).toFixed(2)}`;
+const formatDateTime = (value) => (value ? new Date(value).toLocaleString() : "");
 
 function CatererProfile() {
     const { cateringId } = useParams();
@@ -15,6 +20,10 @@ function CatererProfile() {
 
     const [catering, setCatering] = useState(null);
     const [items, setItems] = useState([]);
+    const [faqs, setFaqs] = useState([]);
+    const [question, setQuestion] = useState("");
+    const [postingQuestion, setPostingQuestion] = useState(false);
+    const [faqMessage, setFaqMessage] = useState("");
     const [isFavorite, setIsFavorite] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -25,15 +34,17 @@ function CatererProfile() {
 
         const loadProfile = async () => {
             try {
-                const [profileResponse, favoriteData] = await Promise.all([
+                const [profileResponse, favoriteData, faqData] = await Promise.all([
                     API.get(`/catalog/caterings/${cateringId}/profile`),
                     getFavorites(),
+                    getCateringFaqs(cateringId),
                 ]);
 
                 if (cancelled) return;
 
                 setCatering(profileResponse.data.catering);
                 setItems(profileResponse.data.items || []);
+                setFaqs(faqData.faqs || []);
                 setIsFavorite(
                     (favoriteData.favoriteIds || []).includes(String(cateringId))
                 );
@@ -64,9 +75,31 @@ function CatererProfile() {
             setIsFavorite((result.favoriteIds || []).includes(String(cateringId)));
             setMessage(result.message || "Favorites updated.");
         } catch (err) {
-            setMessage(
-                err.response?.data?.message || "Could not update favorites."
-            );
+            setMessage(err.response?.data?.message || "Could not update favorites.");
+        }
+    };
+
+    const submitQuestion = async (event) => {
+        event.preventDefault();
+        const cleanedQuestion = question.trim();
+
+        if (!cleanedQuestion) {
+            setFaqMessage("Please write a question first.");
+            return;
+        }
+
+        setPostingQuestion(true);
+        setFaqMessage("");
+
+        try {
+            const result = await askCatererQuestion(cateringId, cleanedQuestion);
+            setFaqs((current) => [result.faq, ...current]);
+            setQuestion("");
+            setFaqMessage(result.message || "Question posted successfully.");
+        } catch (err) {
+            setFaqMessage(err.response?.data?.message || "Could not post your question.");
+        } finally {
+            setPostingQuestion(false);
         }
     };
 
@@ -86,9 +119,9 @@ function CatererProfile() {
                 </div>
                 <button
                     className="btn btn-outline-secondary"
-                    onClick={() => navigate("/customer/favorites")}
+                    onClick={() => navigate("/customer/home")}
                 >
-                    Back to Favorites
+                    Back to Feed
                 </button>
             </div>
         );
@@ -98,9 +131,9 @@ function CatererProfile() {
         <div className="container mt-5 mb-5">
             <button
                 className="btn btn-link px-0 text-decoration-none mb-3"
-                onClick={() => navigate("/customer/favorites")}
+                onClick={() => navigate("/customer/home")}
             >
-                ← Back to Favorites
+                ← Back to Feed
             </button>
 
             <div className="card border-0 shadow-sm overflow-hidden mb-4 caterer-profile-card">
@@ -239,6 +272,81 @@ function CatererProfile() {
                         ))}
                     </div>
                 )}
+            </section>
+
+            <section className="card border-0 shadow-sm mb-5 faq-section-card">
+                <div className="card-body p-4">
+                    <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+                        <div>
+                            <h3 className="fw-bold mb-1">Questions & Answers</h3>
+                            <p className="text-muted mb-0">
+                                Ask something specific about {catering.name}. Questions and caterer answers are public to all customers.
+                            </p>
+                        </div>
+                        <span className="badge text-bg-light">{faqs.length} question(s)</span>
+                    </div>
+
+                    <form onSubmit={submitQuestion} className="faq-question-form mb-4">
+                        <label className="form-label fw-semibold">Ask the caterer</label>
+                        <div className="d-flex flex-column flex-md-row gap-2">
+                            <textarea
+                                className="form-control"
+                                rows="2"
+                                maxLength="500"
+                                value={question}
+                                onChange={(event) => setQuestion(event.target.value)}
+                                placeholder="Example: What ingredients do you use in your biryani?"
+                            />
+                            <button
+                                type="submit"
+                                className="btn btn-primary align-self-md-stretch px-4"
+                                disabled={postingQuestion}
+                            >
+                                {postingQuestion ? "Posting..." : "Ask Question"}
+                            </button>
+                        </div>
+                        <div className="d-flex justify-content-between mt-1">
+                            <small className="text-muted">Your name will be shown with the question.</small>
+                            <small className="text-muted">{question.length}/500</small>
+                        </div>
+                    </form>
+
+                    {faqMessage && <div className="alert alert-info py-2">{faqMessage}</div>}
+
+                    {faqs.length === 0 ? (
+                        <div className="text-center text-muted py-4">
+                            No questions yet. Be the first customer to ask this caterer something.
+                        </div>
+                    ) : (
+                        <div className="d-flex flex-column gap-3">
+                            {faqs.map((faq) => (
+                                <div className="faq-public-item" key={faq._id}>
+                                    <div className="d-flex justify-content-between gap-2 flex-wrap">
+                                        <strong>{faq.customer?.fullName || "Customer"}</strong>
+                                        <small className="text-muted">{formatDateTime(faq.createdAt)}</small>
+                                    </div>
+                                    <p className="fw-semibold mb-2 mt-1">Q: {faq.question}</p>
+
+                                    {faq.answer ? (
+                                        <div className="faq-answer-box">
+                                            <div className="d-flex justify-content-between gap-2 flex-wrap">
+                                                <strong>{catering.name}</strong>
+                                                {faq.answeredAt && (
+                                                    <small className="text-muted">{formatDateTime(faq.answeredAt)}</small>
+                                                )}
+                                            </div>
+                                            <p className="mb-0 mt-1">A: {faq.answer}</p>
+                                        </div>
+                                    ) : (
+                                        <div className="small text-muted fst-italic">
+                                            Waiting for the caterer to answer.
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </section>
 
             <section className="card border-0 shadow-sm review-placeholder-card">

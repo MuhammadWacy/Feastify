@@ -23,6 +23,7 @@ import SellerDashboard from "./pages/seller/SellerDashboard";
 import SellerListing from "./pages/seller/SellerListing";
 import SellerNegotiations from "./pages/seller/SellerNegotiations";
 import DeliveryVerification from "./pages/seller/DeliveryVerification";
+import SellerFaqs from "./pages/seller/SellerFaqs";
 
 import Cart from "./pages/checkout/Cart";
 import Checkout from "./pages/checkout/Checkout";
@@ -265,6 +266,17 @@ function App() {
                         <ProtectedRoute allowedRole="seller">
                             <Layout>
                                 <DeliveryVerification />
+                            </Layout>
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/seller/faqs"
+                    element={
+                        <ProtectedRoute allowedRole="seller">
+                            <Layout>
+                                <SellerFaqs />
                             </Layout>
                         </ProtectedRoute>
                     }

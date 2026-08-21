@@ -14,6 +14,7 @@ const serviceRequestRoutes = require("./routes/serviceRequestRoutes");
 const negotiationRoutes = require("./routes/negotiationRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const favoriteRoutes = require("./routes/favoriteRoutes");
+const faqRoutes = require("./routes/faqRoutes");
 
 const startServer = async () => {
     try {
@@ -32,6 +33,7 @@ const startServer = async () => {
         app.use("/api/negotiations", negotiationRoutes);
         app.use("/api/chat", chatRoutes);
         app.use("/api/favorites", favoriteRoutes);
+        app.use("/api/faqs", faqRoutes);
 
         app.get("/", (req, res) => {
             res.json({
