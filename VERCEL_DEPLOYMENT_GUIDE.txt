@@ -1,0 +1,69 @@
+FEASTIFY - VERCEL DEPLOYMENT NOTES
+===================================
+
+Deploy this one GitHub repository as TWO separate Vercel projects.
+
+1) BACKEND PROJECT
+------------------
+Project name suggestion: feastify-backend
+Root Directory: backend
+Framework Preset: Other / Express auto-detection
+
+Backend environment variables:
+MONGO_URI
+JWT_SECRET
+STRIPE_SECRET_KEY
+CLOUDINARY_CLOUD_NAME
+CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET
+GEMINI_API_KEY
+ONESIGNAL_APP_ID
+ONESIGNAL_REST_API_KEY
+FRONTEND_URL   (set after frontend receives its final Vercel URL)
+
+Do not set PORT on Vercel.
+
+After deployment test:
+https://YOUR-BACKEND.vercel.app/
+Expected JSON message: Welcome to Feastify Backend!
+
+2) FRONTEND PROJECT
+-------------------
+Project name suggestion: feastify
+Root Directory: frontend
+Framework Preset: Vite
+Build Command: npm run build
+Output Directory: dist
+
+Frontend environment variables:
+VITE_API_URL=https://YOUR-BACKEND.vercel.app/api
+VITE_STRIPE_PUBLISHABLE_KEY
+VITE_ONESIGNAL_APP_ID
+
+frontend/vercel.json contains the React Router SPA rewrite, so direct refreshes
+such as /customer/orders should resolve to index.html instead of 404.
+
+3) AFTER FRONTEND DEPLOYS
+-------------------------
+Copy the final frontend URL, for example:
+https://feastify.vercel.app
+
+Go back to the backend Vercel project and set:
+FRONTEND_URL=https://feastify.vercel.app
+
+Then redeploy the backend.
+
+Also update the OneSignal web-app/site URL to the production frontend domain.
+
+4) MONGODB ATLAS
+----------------
+Vercel cannot reach a MongoDB instance running only on your laptop.
+Use your MongoDB Atlas URI in MONGO_URI.
+Ensure Atlas Network Access permits the deployment to connect.
+For a temporary university deployment, many teams use 0.0.0.0/0 together
+with strong MongoDB credentials; restrict it later when possible.
+
+5) IMPORTANT
+------------
+Never commit real .env files or secret API keys to GitHub.
+Only .env.example should be committed.

@@ -20,44 +20,57 @@ const specialOfferRoutes = require("./routes/specialOfferRoutes");
 const complaintRoutes = require("./routes/complaintRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 
-const startServer = async () => {
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+// In Vercel, the Express app runs as a serverless function rather than a
+// permanently listening process. This middleware makes sure MongoDB is ready
+// before any API route executes. connectDB() is connection-aware, so warm
+// serverless invocations reuse the existing Mongoose connection.
+app.use(async (req, res, next) => {
     try {
         await connectDB();
-
-        const app = express();
-
-        app.use(cors());
-        app.use(express.json());
-
-        app.use("/api/auth", authRoutes);
-        app.use("/api/payment", paymentRoutes);
-        app.use("/api/catalog", catalogRoutes);
-        app.use("/api/seller/listing", sellerListingRoutes);
-        app.use("/api/service-requests", serviceRequestRoutes);
-        app.use("/api/negotiations", negotiationRoutes);
-        app.use("/api/chat", chatRoutes);
-        app.use("/api/favorites", favoriteRoutes);
-        app.use("/api/faqs", faqRoutes);
-        app.use("/api/needs", needPostRoutes);
-        app.use("/api/special-offers", specialOfferRoutes);
-        app.use("/api/complaints", complaintRoutes);
-        app.use("/api/reviews", reviewRoutes);
-
-        app.get("/", (req, res) => {
-            res.json({
-                success: true,
-                message: "Welcome to Feastify Backend!",
-            });
-        });
-
-        const PORT = process.env.PORT || 5000;
-
-        app.listen(PORT, () => {
-            console.log(`🚀 Server is running on http://localhost:${PORT}`);
-        });
+        next();
     } catch (error) {
-        console.error("Server failed to start:", error);
+        console.error("Database connection failed:", error);
+        res.status(500).json({
+            success: false,
+            message: "Database connection failed.",
+        });
     }
-};
+});
 
-startServer();
+app.use("/api/auth", authRoutes);
+app.use("/api/payment", paymentRoutes);
+app.use("/api/catalog", catalogRoutes);
+app.use("/api/seller/listing", sellerListingRoutes);
+app.use("/api/service-requests", serviceRequestRoutes);
+app.use("/api/negotiations", negotiationRoutes);
+app.use("/api/chat", chatRoutes);
+app.use("/api/favorites", favoriteRoutes);
+app.use("/api/faqs", faqRoutes);
+app.use("/api/needs", needPostRoutes);
+app.use("/api/special-offers", specialOfferRoutes);
+app.use("/api/complaints", complaintRoutes);
+app.use("/api/reviews", reviewRoutes);
+
+app.get("/", (req, res) => {
+    res.json({
+        success: true,
+        message: "Welcome to Feastify Backend!",
+    });
+});
+
+// Local development still behaves exactly as before.
+if (require.main === module) {
+    const PORT = process.env.PORT || 5000;
+
+    app.listen(PORT, () => {
+        console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    });
+}
+
+// Vercel detects/uses the exported Express application.
+module.exports = app;
