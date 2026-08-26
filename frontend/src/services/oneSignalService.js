@@ -47,6 +47,19 @@ export const initializeOneSignal = async () => {
         console.log("OneSignal initialized successfully");
         return OneSignal;
     } catch (error) {
+        const message = String(error?.message || error || "");
+
+        // React StrictMode or a previously loaded SDK instance can cause the
+        // OneSignal wrapper to report that initialization already happened.
+        // In that case the SDK is usable, so treat it as initialized instead
+        // of repeatedly calling OneSignal.init() and breaking the permission flow.
+        if (message.toLowerCase().includes("already initialized")) {
+            initialized = true;
+            initPromise = Promise.resolve();
+            console.log("OneSignal was already initialized; reusing the existing SDK instance.");
+            return OneSignal;
+        }
+
         initPromise = null;
         console.error("OneSignal initialization failed:", error);
         return null;

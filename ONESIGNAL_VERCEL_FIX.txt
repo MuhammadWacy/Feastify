@@ -1,0 +1,9 @@
+Feastify OneSignal production fix
+
+Changes:
+1. Removed eager OneSignal initialization from frontend/src/main.jsx.
+   OneSignal now initializes lazily when the notification feature needs it.
+2. Hardened frontend/src/services/oneSignalService.js so an "SDK already initialized" response reuses the existing SDK instance instead of repeatedly retrying initialization.
+3. Preserved the Linux/Vercel-safe paymentAPI import casing fix in PaymentProcessing.jsx.
+
+After deployment, set the OneSignal Web app Site URL to the production frontend origin, e.g. https://feastify-frontend.vercel.app, and ensure VITE_ONESIGNAL_APP_ID is the same app's ID.
