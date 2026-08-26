@@ -10,7 +10,7 @@ import {
 
 import { loadStripe } from "@stripe/stripe-js";
 
-import createPayment from "../../services/paymentApi";
+import createPayment from "../../services/paymentAPI";
 import { markServiceRequestPaid } from "../../services/requestService";
 
 const stripePromise = loadStripe(
